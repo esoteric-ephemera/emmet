@@ -191,22 +191,22 @@ def test_task_doc(test_dir, object_name, tmpdir):
 
 
 def test_task_run_calc_type(test_dir, tmpdir):
-    
     from monty.serialization import loadfn
     from emmet.core.tasks import TaskDoc
 
     # Thanks to @wangzyphysics for the VASP I/O that was used to generate this test TaskDoc
-    ref_task_doc = loadfn(test_dir / "task_doc_mp-1198074_no_custodian.json.gz",cls=None)
+    ref_task_doc = loadfn(
+        test_dir / "task_doc_mp-1198074_no_custodian.json.gz", cls=None
+    )
 
     for irun in range(2):
-
         if irun == 0:
             # irun == 0: use the task doc as is
             task_doc = TaskDoc(**ref_task_doc)
         elif irun == 1:
             # irun == 1: pop the {task, run, calc}_type keys and ensure they are correctly repopulated
             task_doc_dict = ref_task_doc.copy()
-            for k in ("task","run","calc"):
+            for k in ("task", "run", "calc"):
                 task_doc_dict.pop(f"{k}_type")
                 assert task_doc_dict.get(f"{k}_type") is None
             task_doc = TaskDoc(**task_doc_dict)
@@ -214,4 +214,3 @@ def test_task_run_calc_type(test_dir, tmpdir):
         assert str(task_doc.task_type) == "Structure Optimization"
         assert str(task_doc.run_type) == "GGA"
         assert str(task_doc.calc_type) == "GGA Structure Optimization"
-
