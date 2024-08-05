@@ -7,6 +7,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+from monty.serialization import loadfn
 import numpy as np
 from pydantic import BaseModel, Extra, Field
 from pymatgen.command_line.bader_caller import bader_analysis_from_path
@@ -641,7 +642,7 @@ class Calculation(CalculationBaseModel):
         parse_dos: Union[str, bool] = False,
         parse_bandstructure: Union[str, bool] = False,
         average_locpot: bool = True,
-        run_bader: bool = False,
+        run_bader: Union[bool,Path,str] = False,
         run_ddec6: Union[bool, str] = False,
         strip_bandstructure_projections: bool = False,
         strip_dos_projections: bool = False,
@@ -762,13 +763,23 @@ class Calculation(CalculationBaseModel):
             vasp_objects[VaspObject.BANDSTRUCTURE] = bandstructure  # type: ignore
 
         bader = None
-        if run_bader and VaspObject.CHGCAR in output_file_paths:
+        if isinstance(run_bader,(str,Path)) and Path(run_bader).is_file():
+            # Load pre-computed bader analysis from file
+            bader = loadfn(str(run_bader))
+        elif run_bader and VaspObject.CHGCAR in output_file_paths:
+            # Compute bader analysis on the fly
             suffix = "" if task_name == "standard" else f".{task_name}"
             bader = bader_analysis_from_path(dir_name, suffix=suffix)
 
         ddec6 = None
-        if run_ddec6 and VaspObject.CHGCAR in output_file_paths:
-            densities_path = run_ddec6 if isinstance(run_ddec6, (str, Path)) else None
+        if isinstance(run_ddec6,(str,Path)) and Path(run_ddec6).is_file():
+            # Load pre-computed DDEC6 analysis from file
+            ddec6 = loadfn(str(run_ddec6))
+        elif run_ddec6 and VaspObject.CHGCAR in output_file_paths:
+            # Compute DDEC6 analysis on the fly
+            run_ddec6 = None
+            if isinstance(run_ddec6, (str, Path)) and Path(run_ddec6).is_dir():
+                densities_path = run_ddec6
             ddec6 = ChargemolAnalysis(
                 path=dir_name, atomic_densities_path=densities_path
             ).summary
