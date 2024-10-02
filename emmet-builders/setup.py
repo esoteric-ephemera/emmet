@@ -12,6 +12,9 @@ setup(
     url="https://github.com/materialsproject/emmet",
     packages=find_namespace_packages(include=["emmet.*"]),
     include_package_data=True,
+    package_data={
+        "emmet.builders.vasp": ["*.json"],
+    },
     install_requires=[
         "emmet-core[all]",
         "maggma>=0.57.6",
