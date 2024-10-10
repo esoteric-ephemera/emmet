@@ -5,7 +5,7 @@ Settings for defaults in the core definitions of Materials Project Documents
 """
 import json
 from pathlib import Path
-from typing import Dict, List, Type, TypeVar, Union
+from typing import Type, TypeVar, Union, List, Dict
 
 import requests
 from monty.json import MontyDecoder
@@ -106,7 +106,7 @@ class EmmetSettings(BaseSettings):
     )
 
     VASP_STRUCTURE_QUALITY_SCORES: Dict[str, int] = Field(
-        {"R2SCAN": 5, "SCAN": 4, "GGA+U": 3, "GGA": 2, "PBESol": 1},
+        {"r2SCAN": 5, "SCAN": 4, "GGA+U": 3, "GGA": 2, "PBEsol": 1},
         description="Dictionary Mapping VASP calculation run types to rung level for VASP materials builder structure data",  # noqa: E501
     )
 
@@ -120,7 +120,7 @@ class EmmetSettings(BaseSettings):
         description="Relative tolerance for kspacing to still be a valid task document",
     )
 
-    VASP_MAX_MAGMOM: dict[str, float] = Field(
+    VASP_MAX_MAGMOM: Dict[str, float] = Field(
         {"Cr": 5}, description="Maximum permitted magnetic moments by element type."
     )
 
@@ -128,14 +128,14 @@ class EmmetSettings(BaseSettings):
         {
             "GGA Structure Optimization": "pymatgen.io.vasp.sets.MPRelaxSet",
             "GGA+U Structure Optimization": "pymatgen.io.vasp.sets.MPRelaxSet",
-            "R2SCAN Structure Optimization": "pymatgen.io.vasp.sets.MPScanRelaxSet",
+            "r2SCAN Structure Optimization": "pymatgen.io.vasp.sets.MPScanRelaxSet",
             "SCAN Structure Optimization": "pymatgen.io.vasp.sets.MPScanRelaxSet",
-            "PBESol Structure Optimization": "pymatgen.io.vasp.sets.MPScanRelaxSet",
+            "PBEsol Structure Optimization": "pymatgen.io.vasp.sets.MPScanRelaxSet",
             "GGA Static": "pymatgen.io.vasp.sets.MPStaticSet",
             "GGA+U Static": "pymatgen.io.vasp.sets.MPStaticSet",
-            "R2SCAN Static": "pymatgen.io.vasp.sets.MPScanStaticSet",
+            "r2SCAN Static": "pymatgen.io.vasp.sets.MPScanStaticSet",
             "SCAN Static": "pymatgen.io.vasp.sets.MPScanStaticSet",
-            "PBESol Static": "pymatgen.io.vasp.sets.MPScanStaticSet",
+            "PBEsol Static": "pymatgen.io.vasp.sets.MPScanStaticSet",
             "HSE06 Static": "pymatgen.io.vasp.sets.MPScanStaticSet",
             "GGA NSCF Uniform": "pymatgen.io.vasp.sets.MPNonSCFSet",
             "GGA+U NSCF Uniform": "pymatgen.io.vasp.sets.MPNonSCFSet",

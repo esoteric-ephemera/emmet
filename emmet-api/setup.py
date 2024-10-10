@@ -17,13 +17,14 @@ setup(
         "fastapi",
         "gunicorn",
         "boto3",
-        "maggma",
+        "maggma[api]",
         "ddtrace",
         "setproctitle",
         "shapely",
         "asgi-logger",
         "pymatgen-analysis-alloys>=0.0.3",
         "pymatgen-analysis-defects>=2024.7.18",
+        "pymongo<4.9",
     ],
     extras_require={
         "test": [

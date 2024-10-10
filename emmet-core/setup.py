@@ -23,12 +23,13 @@ setup(
     packages=find_namespace_packages(include=["emmet.*"]),
     package_data={
         "emmet.core.vasp.calc_types": ["*.yaml"],
+        "emmet.core.qchem.calc_types": ["*.yaml"],
         "emmet.core.subtrates": ["*.json"],
     },
     include_package_data=True,
     install_requires=[
         "numpy<2",
-        "pymatgen",
+        "pymatgen>=2024.6.10",
         "monty>=2024.2.2",
         "pydantic>=2.0",
         "pydantic-settings>=2.0",
@@ -46,7 +47,7 @@ setup(
             "solvation-analysis>=0.4.1",
             "MDAnalysis>=2.7.0",
         ],
-        "ml": ["chgnet", "matgl"],
+        "ml": ["chgnet", "matgl", "dgl<=2.1"],
         "test": [
             "pre-commit",
             "pytest",
