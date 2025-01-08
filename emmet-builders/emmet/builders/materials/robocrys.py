@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import dict, Optional
 from maggma.builders.map_builder import MapBuilder
 from maggma.core import Store
 
@@ -12,7 +12,7 @@ class RobocrystallographerBuilder(MapBuilder):
         self,
         oxidation_states: Store,
         robocrys: Store,
-        query: Optional[Dict] = None,
+        query: Optional[dict] = None,
         **kwargs
     ):
         self.oxidation_states = oxidation_states

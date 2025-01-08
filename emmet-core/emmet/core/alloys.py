@@ -1,5 +1,4 @@
 from emmet.core.base import EmmetBaseModel
-from typing import Dict
 
 try:
     from pymatgen.analysis.alloys.core import (
@@ -18,7 +17,7 @@ class AlloyPairDoc(EmmetBaseModel):
     pair_id: str
 
     # fields useful for building search indices
-    _search: Dict
+    _search: dict
 
     @classmethod
     def from_pair(cls, pair: AlloyPair):

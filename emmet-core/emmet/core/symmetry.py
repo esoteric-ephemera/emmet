@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from pydantic import BaseModel, Field
 from pymatgen.core import Structure
@@ -78,7 +78,7 @@ class PointGroupData(BaseModel):
             eigen_tolerance=eigentol,
             matrix_tolerance=matrixtol,
         )
-        symmetry: Dict[str, Any] = {
+        symmetry: dict[str, Any] = {
             "tolerance": tol,
             "eigen_tolerance": eigentol,
             "matrix_tolerance": matrixtol,
@@ -157,7 +157,7 @@ class SymmetryData(BaseModel):
 
     @classmethod
     def from_structure(cls, structure: Structure) -> "SymmetryData":
-        symmetry: Dict[str, Any] = {
+        symmetry: dict[str, Any] = {
             "source": "spglib",
             "symbol": None,
             "number": None,

@@ -1,7 +1,8 @@
 from datetime import datetime
 from itertools import chain
 from math import ceil
-from typing import Any, Optional, Iterable, Iterator, List, Dict
+from typing import Any, Optional
+from collections.abc import Iterable, Iterator
 
 # from monty.serialization import loadfn, dumpfn
 
@@ -11,12 +12,12 @@ from maggma.utils import grouper
 
 from emmet.core.molecules.summary import MoleculeSummaryDoc
 from emmet.core.utils import jsanitize
-from emmet.builders.settings import EmmetBuildSettings
+from emmet.builders.settings import EmmetBuildsettings
 
 
 __author__ = "Evan Spotte-Smith"
 
-SETTINGS = EmmetBuildSettings()
+SETTINGS = EmmetBuildsettings()
 
 
 class SummaryBuilder(Builder):
@@ -42,8 +43,8 @@ class SummaryBuilder(Builder):
         thermo: Store,
         vibes: Store,
         summary: Store,
-        query: Optional[Dict] = None,
-        settings: Optional[EmmetBuildSettings] = None,
+        query: Optional[dict] = None,
+        settings: Optional[EmmetBuildsettings] = None,
         **kwargs,
     ):
         self.molecules = molecules
@@ -57,7 +58,7 @@ class SummaryBuilder(Builder):
         self.vibes = vibes
         self.summary = summary
         self.query = query if query else dict()
-        self.settings = EmmetBuildSettings.autoload(settings)
+        self.settings = EmmetBuildsettings.autoload(settings)
         self.kwargs = kwargs
 
         super().__init__(
@@ -184,7 +185,7 @@ class SummaryBuilder(Builder):
         self.summary.ensure_index("last_updated")
         self.summary.ensure_index("formula_alphabetical")
 
-    def prechunk(self, number_splits: int) -> Iterable[Dict]:  # pragma: no cover
+    def prechunk(self, number_splits: int) -> Iterable[dict]:  # pragma: no cover
         """Prechunk the builder for distributed computation"""
 
         temp_query = dict(self.query)
@@ -210,7 +211,7 @@ class SummaryBuilder(Builder):
         for formula_chunk in grouper(to_process_forms, N):
             yield {"query": {"formula_alphabetical": {"$in": list(formula_chunk)}}}
 
-    def get_items(self) -> Iterator[List[Dict]]:
+    def get_items(self) -> Iterator[list[dict]]:
         """
         Gets all items to process into summary documents.
         This does no datetime checking; relying on on whether
@@ -221,7 +222,7 @@ class SummaryBuilder(Builder):
         """
 
         self.logger.info("Summary builder started")
-        self.logger.info("Setting indexes")
+        self.logger.info("setting indexes")
         self.ensure_indexes()
 
         # Save timestamp to mark buildtime
@@ -249,7 +250,7 @@ class SummaryBuilder(Builder):
         self.logger.info(f"Found {len(to_process_docs)} unprocessed documents")
         self.logger.info(f"Found {len(to_process_forms)} unprocessed formulas")
 
-        # Set total for builder bars to have a total
+        # set total for builder bars to have a total
         self.total = len(to_process_forms)
 
         for formula in to_process_forms:
@@ -259,20 +260,20 @@ class SummaryBuilder(Builder):
 
             yield molecules
 
-    def process_item(self, items: List[Dict]) -> List[Dict]:
+    def process_item(self, items: list[dict]) -> list[dict]:
         """
         Process the tasks into a MoleculeSummaryDoc
 
         Args:
-            tasks List[Dict] : a list of MoleculeDocs in dict form
+            tasks list[dict] : a list of MoleculeDocs in dict form
 
         Returns:
             [dict] : a list of new orbital docs
         """
 
-        def _group_docs(docs: List[Dict[str, Any]], by_method: bool = False):
+        def _group_docs(docs: list[dict[str, Any]], by_method: bool = False):
             """Helper function to group docs by solvent"""
-            grouped: Dict[str, Any] = dict()
+            grouped: dict[str, Any] = dict()
 
             for doc in docs:
                 solvent = doc.get("solvent")
@@ -352,7 +353,7 @@ class SummaryBuilder(Builder):
 
         return jsanitize([doc.model_dump() for doc in summary_docs], allow_bson=True)
 
-    def update_targets(self, items: List[List[Dict]]):
+    def update_targets(self, items: list[list[dict]]):
         """
         Inserts the new documents into the summary collection
 

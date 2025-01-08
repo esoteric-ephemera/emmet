@@ -14,5 +14,5 @@ class UserSettingsDoc(BaseModel):
     settings: Optional[dict] = Field(
         None,
         title="Consumer ID settings",
-        description="Settings defined for a specific user.",
+        description="settings defined for a specific user.",
     )

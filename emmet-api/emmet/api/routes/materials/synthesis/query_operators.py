@@ -1,4 +1,4 @@
-from typing import Optional, List, Dict, Union, Any
+from typing import Optional, Union, Any
 from fastapi import Query
 from pymatgen.core import Composition
 from maggma.api.query_operator import QueryOperator
@@ -17,7 +17,7 @@ class SynthesisSearchQuery(QueryOperator):
             None,
             description="Comma delimited string keywords to search synthesis paragraph text with.",
         ),
-        synthesis_type: Optional[List[SynthesisTypeEnum]] = Query(
+        synthesis_type: Optional[list[SynthesisTypeEnum]] = Query(
             None, description="Type of synthesis to include."
         ),
         target_formula: Optional[str] = Query(
@@ -26,8 +26,8 @@ class SynthesisSearchQuery(QueryOperator):
         precursor_formula: Optional[str] = Query(
             None, description="Chemical formula of the precursor material."
         ),
-        operations: Optional[List[OperationTypeEnum]] = Query(
-            None, description="List of operations that syntheses must have."
+        operations: Optional[list[OperationTypeEnum]] = Query(
+            None, description="list of operations that syntheses must have."
         ),
         condition_heating_temperature_min: Optional[float] = Query(
             None, description="Minimal heating temperature."
@@ -41,13 +41,13 @@ class SynthesisSearchQuery(QueryOperator):
         condition_heating_time_max: Optional[float] = Query(
             None, description="Maximal heating time."
         ),
-        condition_heating_atmosphere: Optional[List[str]] = Query(
+        condition_heating_atmosphere: Optional[list[str]] = Query(
             None, description='Required heating atmosphere, such as "air", "argon".'
         ),
-        condition_mixing_device: Optional[List[str]] = Query(
+        condition_mixing_device: Optional[list[str]] = Query(
             None, description='Required mixing device, such as "zirconia", "Al2O3".'
         ),
-        condition_mixing_media: Optional[List[str]] = Query(
+        condition_mixing_media: Optional[list[str]] = Query(
             None, description='Required mixing media, such as "alcohol", "water".'
         ),
         _skip: int = Query(0, description="Number of entries to skip in the search"),
@@ -56,7 +56,7 @@ class SynthesisSearchQuery(QueryOperator):
             description="Max number of entries to return in a single query. Limited to 10.",
         ),
     ):
-        project_dict: Dict[str, Union[Dict, int]] = {
+        project_dict: dict[str, Union[dict, int]] = {
             "_id": 0,
             "doi": 1,
             "synthesis_type": 1,
@@ -71,7 +71,7 @@ class SynthesisSearchQuery(QueryOperator):
             "paragraph_string": 1,
         }
 
-        pipeline: List[Any] = []
+        pipeline: list[Any] = []
 
         if keywords:
             pipeline.insert(
@@ -107,7 +107,7 @@ class SynthesisSearchQuery(QueryOperator):
 
         pipeline.append({"$project": project_dict})
 
-        crit: Dict[str, Any] = {}
+        crit: dict[str, Any] = {}
 
         if synthesis_type:
             crit["synthesis_type"] = {"$in": synthesis_type}

@@ -1,4 +1,3 @@
-from typing import List
 
 import numpy as np
 
@@ -7,14 +6,14 @@ from pymatgen.core import Molecule
 from pymatgen.core.trajectory import Trajectory
 
 
-def calcs_reversed_to_trajectory(calcs_reversed: List[dict]):
+def calcs_reversed_to_trajectory(calcs_reversed: list[dict]):
     """
     Converts data from calc_reversed to pymatgen Trajectory objects
     that contain structure, energy, and gradient data for each
     geometry optimization step.
 
     Args:
-        calcs_reversed: List of dictionaries in calcs_reversed entry
+        calcs_reversed: list of dictionaries in calcs_reversed entry
             of a task document.
     """
     trajectories = list()

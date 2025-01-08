@@ -1,7 +1,8 @@
 from math import ceil
 import warnings
 from itertools import chain
-from typing import Dict, Iterator, List, Optional, Set
+from typing import Optional
+from collections.abc import Iterator
 from datetime import datetime
 
 from maggma.core import Builder, Store
@@ -22,7 +23,7 @@ class ThermoBuilder(Builder):
         thermo: Store,
         corrected_entries: Store,
         phase_diagram: Optional[Store] = None,
-        query: Optional[Dict] = None,
+        query: Optional[dict] = None,
         num_phase_diagram_eles: Optional[int] = None,
         chunk_size: int = 1000,
         **kwargs,
@@ -49,7 +50,7 @@ class ThermoBuilder(Builder):
         self.phase_diagram = phase_diagram
         self.num_phase_diagram_eles = num_phase_diagram_eles
         self.chunk_size = chunk_size
-        self._completed_tasks: Set[str] = set()
+        self._completed_tasks: set[str] = set()
 
         if self.thermo.key != "thermo_id":
             warnings.warn(
@@ -111,7 +112,7 @@ class ThermoBuilder(Builder):
             coll.ensure_index("chemsys")
             coll.ensure_index("phase_diagram_id")
 
-    def prechunk(self, number_splits: int) -> Iterator[Dict]:  # pragma: no cover
+    def prechunk(self, number_splits: int) -> Iterator[dict]:  # pragma: no cover
         to_process_chemsys = self._get_chemsys_to_process()
 
         N = ceil(len(to_process_chemsys) / number_splits)
@@ -119,14 +120,14 @@ class ThermoBuilder(Builder):
         for chemsys_chunk in grouper(to_process_chemsys, N):
             yield {"query": {"chemsys": {"$in": list(chemsys_chunk)}}}
 
-    def get_items(self) -> Iterator[List[Dict]]:
+    def get_items(self) -> Iterator[list[dict]]:
         """
         Gets whole chemical systems of entries to process
         """
 
         self.logger.info("Thermo Builder Started")
 
-        self.logger.info("Setting indexes")
+        self.logger.info("setting indexes")
         self.ensure_indexes()
 
         to_process_chemsys = self._get_chemsys_to_process()
@@ -224,7 +225,7 @@ class ThermoBuilder(Builder):
         """
         Inserts the thermo and phase diagram docs into the thermo collection
         Args:
-            items ([[tuple(List[dict],List[dict])]]): a list of a list of thermo and phase diagram dict pairs to update
+            items ([[tuple(list[dict],list[dict])]]): a list of a list of thermo and phase diagram dict pairs to update
         """
 
         thermo_docs = [pair[0] for pair_list in items for pair in pair_list]

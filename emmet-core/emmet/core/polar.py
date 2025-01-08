@@ -1,5 +1,5 @@
 """ Core definition for Polar property Document """
-from typing import List, Optional
+from typing import Optional
 from emmet.core.mpid import MPID
 
 import numpy as np
@@ -14,8 +14,8 @@ from pymatgen.core.tensors import Tensor
 
 SETTINGS = EmmetSettings()
 
-Vector = List[float]
-PiezoTensor = List[Vector]
+Vector = list[float]
+PiezoTensor = list[Vector]
 PiezoTensor.__doc__ = "Rank 3 real space tensor in Voigt notation"  # type: ignore
 
 
@@ -88,10 +88,10 @@ class PiezoelectricDoc(PropertyDoc):
     )
 
     e_ij_max: float = Field(description="Piezoelectric modulus")
-    max_direction: List[int] = Field(
+    max_direction: list[int] = Field(
         description="Miller direction for maximum piezo response"
     )
-    strain_for_max: List[float] = Field(
+    strain_for_max: list[float] = Field(
         description="Normalized strain direction for maximum piezo repsonse"
     )
 
@@ -143,11 +143,11 @@ class BornEffectiveCharges(BaseModel):
     A block for the Born effective charges
     """
 
-    value: Optional[List[Matrix3D]] = Field(
+    value: Optional[list[Matrix3D]] = Field(
         None, description="Value of the Born effective charges."
     )
 
-    symmetrized_value: Optional[List[Matrix3D]] = Field(
+    symmetrized_value: Optional[list[Matrix3D]] = Field(
         None,
         description="Value of the Born effective charges after symmetrization to obey the"
         "charge neutrality sum rule.",

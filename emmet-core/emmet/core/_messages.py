@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import list, Optional
 from datetime import datetime
 from pydantic import BaseModel, Field
 from enum import Enum
@@ -24,7 +24,7 @@ class MessagesDoc(BaseModel):
         None, title="Body", description="Main text body of message."
     )
 
-    authors: Optional[List[str]] = Field(
+    authors: Optional[list[str]] = Field(
         None,
         title="Title",
         description="Generic title or short summary for the message.",

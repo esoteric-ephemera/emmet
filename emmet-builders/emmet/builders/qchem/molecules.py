@@ -1,7 +1,8 @@
 from datetime import datetime
 from itertools import chain, groupby
 from math import ceil
-from typing import Any, Dict, Iterable, Iterator, List, Optional, Set, Union
+from typing import Any, Optional, Union
+from collections.abc import Iterable, Iterator
 
 import networkx as nx
 
@@ -9,7 +10,7 @@ from maggma.builders import Builder
 from maggma.stores import Store
 from maggma.utils import grouper
 
-from emmet.builders.settings import EmmetBuildSettings
+from emmet.builders.settings import EmmetBuildsettings
 from emmet.core.utils import get_molecule_id, group_molecules, jsanitize, make_mol_graph
 from emmet.core.qchem.molecule import (
     best_lot,
@@ -24,14 +25,14 @@ from emmet.core.qchem.calc_types import LevelOfTheory, CalcType, TaskType
 __author__ = "Evan Spotte-Smith <ewcspottesmith@lbl.gov>"
 
 
-SETTINGS = EmmetBuildSettings()
+SETTINGS = EmmetBuildsettings()
 
 
 def evaluate_molecule(
     mol_doc: MoleculeDoc,
-    funct_scores: Dict[str, int] = SETTINGS.QCHEM_FUNCTIONAL_QUALITY_SCORES,
-    basis_scores: Dict[str, int] = SETTINGS.QCHEM_BASIS_QUALITY_SCORES,
-    solvent_scores: Dict[str, int] = SETTINGS.QCHEM_SOLVENT_MODEL_QUALITY_SCORES,
+    funct_scores: dict[str, int] = SETTINGS.QCHEM_FUNCTIONAL_QUALITY_SCORES,
+    basis_scores: dict[str, int] = SETTINGS.QCHEM_BASIS_QUALITY_SCORES,
+    solvent_scores: dict[str, int] = SETTINGS.QCHEM_SOLVENT_MODEL_QUALITY_SCORES,
 ):
     """
     Helper function to order optimization calcs by
@@ -106,8 +107,8 @@ class MoleculesAssociationBuilder(Builder):
         self,
         tasks: Store,
         assoc: Store,
-        query: Optional[Dict] = None,
-        settings: Optional[EmmetBuildSettings] = None,
+        query: Optional[dict] = None,
+        settings: Optional[EmmetBuildsettings] = None,
         **kwargs,
     ):
         """
@@ -121,7 +122,7 @@ class MoleculesAssociationBuilder(Builder):
         self.tasks = tasks
         self.assoc = assoc
         self.query = query if query else dict()
-        self.settings = EmmetBuildSettings.autoload(settings)
+        self.settings = EmmetBuildsettings.autoload(settings)
         self.kwargs = kwargs
 
         super().__init__(sources=[tasks], targets=[assoc], **kwargs)
@@ -145,7 +146,7 @@ class MoleculesAssociationBuilder(Builder):
         self.assoc.ensure_index("task_ids")
         self.assoc.ensure_index("formula_alphabetical")
 
-    def prechunk(self, number_splits: int) -> Iterable[Dict]:  # pragma: no cover
+    def prechunk(self, number_splits: int) -> Iterable[dict]:  # pragma: no cover
         """Prechunk the molecule builder for distributed computation"""
 
         temp_query = dict(self.query)
@@ -167,7 +168,7 @@ class MoleculesAssociationBuilder(Builder):
         for hash_chunk in grouper(to_process_hashes, N):
             yield {"query": {"species_hash": {"$in": list(hash_chunk)}}}
 
-    def get_items(self) -> Iterator[List[TaskDocument]]:
+    def get_items(self) -> Iterator[list[TaskDocument]]:
         """
         Gets all items to process into molecules (and other) documents.
         This does no datetime checking; relying on on whether
@@ -182,7 +183,7 @@ class MoleculesAssociationBuilder(Builder):
             f"Allowed task types: {[task_type.value for task_type in self.settings.QCHEM_ALLOWED_TASK_TYPES]}"
         )
 
-        self.logger.info("Setting indexes")
+        self.logger.info("setting indexes")
         self.ensure_indexes()
 
         # Save timestamp to mark buildtime
@@ -206,7 +207,7 @@ class MoleculesAssociationBuilder(Builder):
         self.logger.info(f"Found {len(to_process_tasks)} unprocessed tasks")
         self.logger.info(f"Found {len(to_process_hashes)} unprocessed hashes")
 
-        # Set total for builder bars to have a total
+        # set total for builder bars to have a total
         self.total = len(to_process_hashes)
 
         projected_fields = [
@@ -249,7 +250,7 @@ class MoleculesAssociationBuilder(Builder):
 
             yield to_yield
 
-    def process_item(self, tasks: List[TaskDocument]) -> List[Dict]:
+    def process_item(self, tasks: list[TaskDocument]) -> list[dict]:
         """
         Process the tasks into a MoleculeDoc
 
@@ -285,7 +286,7 @@ class MoleculesAssociationBuilder(Builder):
 
         return jsanitize([mol.model_dump() for mol in molecules], allow_bson=True)
 
-    def update_targets(self, items: List[List[Dict]]):
+    def update_targets(self, items: list[list[dict]]):
         """
         Inserts the new molecules into the molecules collection
 
@@ -311,8 +312,8 @@ class MoleculesAssociationBuilder(Builder):
             self.logger.info("No items to update")
 
     def filter_and_group_tasks(
-        self, tasks: List[TaskDocument]
-    ) -> Iterator[List[TaskDocument]]:
+        self, tasks: list[TaskDocument]
+    ) -> Iterator[list[TaskDocument]]:
         """
         Groups tasks by identical structure
         """
@@ -360,8 +361,8 @@ class MoleculesBuilder(Builder):
         self,
         assoc: Store,
         molecules: Store,
-        query: Optional[Dict] = None,
-        settings: Optional[EmmetBuildSettings] = None,
+        query: Optional[dict] = None,
+        settings: Optional[EmmetBuildsettings] = None,
         **kwargs,
     ):
         """
@@ -375,7 +376,7 @@ class MoleculesBuilder(Builder):
         self.assoc = assoc
         self.molecules = molecules
         self.query = query if query else dict()
-        self.settings = EmmetBuildSettings.autoload(settings)
+        self.settings = EmmetBuildsettings.autoload(settings)
         self.kwargs = kwargs
 
         super().__init__(sources=[assoc], targets=[molecules], **kwargs)
@@ -397,7 +398,7 @@ class MoleculesBuilder(Builder):
         self.molecules.ensure_index("task_ids")
         self.molecules.ensure_index("formula_alphabetical")
 
-    def prechunk(self, number_splits: int) -> Iterable[Dict]:  # pragma: no cover
+    def prechunk(self, number_splits: int) -> Iterable[dict]:  # pragma: no cover
         """Prechunk the molecule builder for distributed computation"""
 
         temp_query = dict(self.query)
@@ -444,7 +445,7 @@ class MoleculesBuilder(Builder):
         for formula_chunk in grouper(to_process_forms, N):
             yield {"query": {"formula_alphabetical": {"$in": list(formula_chunk)}}}
 
-    def get_items(self) -> Iterator[List[Dict]]:
+    def get_items(self) -> Iterator[list[dict]]:
         """
         Gets all items to process into molecules (and other) documents.
         This does no datetime checking; relying on on whether
@@ -455,7 +456,7 @@ class MoleculesBuilder(Builder):
         """
 
         self.logger.info("Molecules builder started")
-        self.logger.info("Setting indexes")
+        self.logger.info("setting indexes")
         self.ensure_indexes()
 
         # Save timestamp to mark buildtime
@@ -504,7 +505,7 @@ class MoleculesBuilder(Builder):
         self.logger.info(f"Found {len(to_process_docs)} unprocessed documents")
         self.logger.info(f"Found {len(to_process_forms)} unprocessed formulas")
 
-        # Set total for builder bars to have a total
+        # set total for builder bars to have a total
         self.total = len(to_process_forms)
 
         for formula in to_process_forms:
@@ -514,12 +515,12 @@ class MoleculesBuilder(Builder):
 
             yield assoc
 
-    def process_item(self, items: List[Dict]) -> List[Dict]:
+    def process_item(self, items: list[dict]) -> list[dict]:
         """
         Process the tasks into a MoleculeDoc
 
         Args:
-            tasks List[Dict] : a list of task docs
+            tasks list[dict] : a list of task docs
 
         Returns:
             [dict] : a list of new molecule docs
@@ -550,14 +551,14 @@ class MoleculesBuilder(Builder):
             levels_of_theory = dict()
             solvents = dict()
             lot_solvents = dict()
-            unique_calc_types: Set[Union[str, CalcType]] = set()
-            unique_task_types: Set[Union[str, TaskType]] = set()
-            unique_levels_of_theory: Set[Union[str, LevelOfTheory]] = set()
-            unique_solvents: Set[str] = set()
-            unique_lot_solvents: Set[str] = set()
+            unique_calc_types: set[Union[str, CalcType]] = set()
+            unique_task_types: set[Union[str, TaskType]] = set()
+            unique_levels_of_theory: set[Union[str, LevelOfTheory]] = set()
+            unique_solvents: set[str] = set()
+            unique_lot_solvents: set[str] = set()
             origins = list()
             entries = list()
-            best_entries: Dict[str, Any] = dict()
+            best_entries: dict[str, Any] = dict()
             constituent_molecules = list()
             similar_molecules = list()
 
@@ -652,7 +653,7 @@ class MoleculesBuilder(Builder):
             [mol.model_dump() for mol in complete_mol_docs], allow_bson=True
         )
 
-    def update_targets(self, items: List[List[Dict]]):
+    def update_targets(self, items: list[list[dict]]):
         """
         Inserts the new molecules into the molecules collection
 
@@ -685,7 +686,7 @@ class MoleculesBuilder(Builder):
         else:
             self.logger.info("No items to update")
 
-    def group_mol_docs(self, assoc: List[MoleculeDoc]) -> Iterator[List[MoleculeDoc]]:
+    def group_mol_docs(self, assoc: list[MoleculeDoc]) -> Iterator[list[MoleculeDoc]]:
         """
         Groups molecules by:
             - highest level of theory
@@ -705,7 +706,7 @@ class MoleculesBuilder(Builder):
 
         # Group by charge and spin
         for c_s, group in groupby(sorted(assoc, key=charge_spin), key=charge_spin):
-            subgroups: List[Dict[str, Any]] = list()
+            subgroups: list[dict[str, Any]] = list()
             for mol_doc in group:
                 mol_graph = make_mol_graph(mol_doc.molecule)
                 mol_hash = mol_doc.species_hash

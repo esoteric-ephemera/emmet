@@ -6,7 +6,7 @@ from collections import defaultdict
 from datetime import datetime
 from enum import Enum
 from math import isnan
-from typing import Dict, List, Optional, Type, TypeVar, Union
+from typing import Optional, Type, TypeVar, Union
 
 import numpy as np
 from pydantic import BaseModel, Field
@@ -58,7 +58,7 @@ class BSObjectDoc(BaseModel):
         default_factory=datetime.utcnow,
     )
 
-    data: Optional[Union[Dict, BandStructureSymmLine]] = Field(
+    data: Optional[Union[dict, BandStructureSymmLine]] = Field(
         None, description="The band structure object for the given calculation ID"
     )
 
@@ -93,11 +93,11 @@ class ElectronicStructureBaseData(BaseModel):
 
     band_gap: float = Field(..., description="Band gap energy in eV.")
 
-    cbm: Optional[Union[float, Dict]] = Field(
+    cbm: Optional[Union[float, dict]] = Field(
         None, description="Conduction band minimum data."
     )
 
-    vbm: Optional[Union[float, Dict]] = Field(
+    vbm: Optional[Union[float, dict]] = Field(
         None, description="Valence band maximum data."
     )
 
@@ -117,7 +117,7 @@ class ElectronicStructureSummary(ElectronicStructureBaseData):
 class BandStructureSummaryData(ElectronicStructureSummary):
     nbands: float = Field(..., description="Number of bands.")
 
-    equivalent_labels: Dict = Field(
+    equivalent_labels: dict = Field(
         ..., description="Equivalent k-point labels in other k-path conventions."
     )
 
@@ -133,7 +133,7 @@ class DosSummaryData(ElectronicStructureBaseData):
 class BandstructureData(BaseModel):
     setyawan_curtarolo: Optional[BandStructureSummaryData] = Field(
         None,
-        description="Band structure summary data using the Setyawan-Curtarolo path convention.",
+        description="Band structure summary data using the setyawan-Curtarolo path convention.",
     )
 
     hinuma: Optional[BandStructureSummaryData] = Field(
@@ -148,16 +148,16 @@ class BandstructureData(BaseModel):
 
 
 class DosData(BaseModel):
-    total: Optional[Dict[Union[Spin, str], DosSummaryData]] = Field(
+    total: Optional[dict[Union[Spin, str], DosSummaryData]] = Field(
         None, description="Total DOS summary data."
     )
 
     elemental: Optional[
-        Dict[
+        dict[
             Element,
-            Dict[
+            dict[
                 Union[Literal["total", "s", "p", "d", "f"], OrbitalType],
-                Dict[Union[Literal["1", "-1"], Spin], DosSummaryData],
+                dict[Union[Literal["1", "-1"], Spin], DosSummaryData],
             ],
         ]
     ] = Field(
@@ -166,9 +166,9 @@ class DosData(BaseModel):
     )
 
     orbital: Optional[
-        Dict[
+        dict[
             Union[Literal["total", "s", "p", "d", "f"], OrbitalType],
-            Dict[Union[Literal["1", "-1"], Spin], DosSummaryData],
+            dict[Union[Literal["1", "-1"], Spin], DosSummaryData],
         ]
     ] = Field(
         None,
@@ -207,14 +207,14 @@ class ElectronicStructureDoc(PropertyDoc, ElectronicStructureSummary):
     def from_bsdos(  # type: ignore[override]
         cls: Type[T],
         material_id: MPID,
-        dos: Dict[MPID, CompleteDos],
+        dos: dict[MPID, CompleteDos],
         is_gap_direct: bool,
         is_metal: bool,
-        origins: List[dict] = [],
-        structures: Optional[Dict[MPID, Structure]] = None,
-        setyawan_curtarolo: Optional[Dict[MPID, BandStructureSymmLine]] = None,
-        hinuma: Optional[Dict[MPID, BandStructureSymmLine]] = None,
-        latimer_munro: Optional[Dict[MPID, BandStructureSymmLine]] = None,
+        origins: list[dict] = [],
+        structures: Optional[dict[MPID, Structure]] = None,
+        setyawan_curtarolo: Optional[dict[MPID, BandStructureSymmLine]] = None,
+        hinuma: Optional[dict[MPID, BandStructureSymmLine]] = None,
+        latimer_munro: Optional[dict[MPID, BandStructureSymmLine]] = None,
         **kwargs,
     ) -> T:
         """
@@ -222,18 +222,18 @@ class ElectronicStructureDoc(PropertyDoc, ElectronicStructureSummary):
 
         Args:
             material_id (MPID): A material ID.
-            dos (Dict[MPID, CompleteDos]): Dictionary mapping a calculation (task) ID to a CompleteDos object.
+            dos (dict[MPID, CompleteDos]): dictionary mapping a calculation (task) ID to a CompleteDos object.
             is_gap_direct (bool): Direct gap indicator included at root level of document.
             is_metal (bool): Metallic indicator included at root level of document.
-            structures (Dict[MPID, Structure]) = Dictionary mapping a calculation (task) ID to the structures used
+            structures (dict[MPID, Structure]) = dictionary mapping a calculation (task) ID to the structures used
                 as inputs. This is to ensures correct magnetic moment information is included.
-            setyawan_curtarolo (Dict[MPID, BandStructureSymmLine]): Dictionary mapping a calculation (task) ID to a
-                BandStructureSymmLine object from a calculation run using the Setyawan-Curtarolo k-path convention.
-            hinuma (Dict[MPID, BandStructureSymmLine]): Dictionary mapping a calculation (task) ID to a
+            setyawan_curtarolo (dict[MPID, BandStructureSymmLine]): dictionary mapping a calculation (task) ID to a
+                BandStructureSymmLine object from a calculation run using the setyawan-Curtarolo k-path convention.
+            hinuma (dict[MPID, BandStructureSymmLine]): dictionary mapping a calculation (task) ID to a
                 BandStructureSymmLine object from a calculation run using the Hinuma et al. k-path convention.
-            latimer_munro (Dict[MPID, BandStructureSymmLine]): Dictionary mapping a calculation (task) ID to a
+            latimer_munro (dict[MPID, BandStructureSymmLine]): dictionary mapping a calculation (task) ID to a
                 BandStructureSymmLine object from a calculation run using the Latimer-Munro k-path convention.
-            origins (List[dict]): Optional origins information for final doc
+            origins (list[dict]): Optional origins information for final doc
 
         """
 

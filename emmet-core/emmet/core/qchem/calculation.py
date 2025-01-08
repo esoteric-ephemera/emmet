@@ -4,11 +4,11 @@
 
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, dict, list, Optional, Union
 
 import numpy as np
 import warnings
-from pydantic import field_validator, BaseModel, Field, ConfigDict
+from pydantic import field_validator, BaseModel, Field, Configdict
 from datetime import datetime
 from pymatgen.io.qchem.inputs import QCInput
 from pymatgen.io.qchem.outputs import QCOutput
@@ -65,13 +65,13 @@ class CalculationInput(BaseModel):
         None, description="input molecule geometry before the QChem calculation"
     )
 
-    # parameters: Dict[str, Any] = Field(
+    # parameters: dict[str, Any] = Field(
     #     None, description = "Parameters from a previous QChem calculation."
     # )
 
     charge: int = Field(None, description="The charge of the input molecule")
 
-    rem: Optional[Dict[str, Any]] = Field(
+    rem: Optional[dict[str, Any]] = Field(
         None,
         description="The rem dict of the input file which has all the input parameters",
     )
@@ -80,21 +80,21 @@ class CalculationInput(BaseModel):
         None, description="The type of QChem calculation being performed"
     )
 
-    opt: Optional[Dict[str, Any]] = Field(
+    opt: Optional[dict[str, Any]] = Field(
         None,
         description="A dictionary of opt section. For instance atom constraints and fixed atoms. Go to QCInput definition for more details.",
     )
 
-    pcm: Optional[Dict[str, Any]] = Field(
+    pcm: Optional[dict[str, Any]] = Field(
         None, description="A dictionary for the PCM solvent details if used"
     )
 
-    solvent: Optional[Dict[str, Any]] = Field(
+    solvent: Optional[dict[str, Any]] = Field(
         None,
         description="The solvent parameters used if the PCM solvent model has been employed",
     )
 
-    smx: Optional[Dict[str, Any]] = Field(
+    smx: Optional[dict[str, Any]] = Field(
         None,
         description="A dictionary for the solvent parameters if the SMD solvent method has been employed",
     )
@@ -104,16 +104,16 @@ class CalculationInput(BaseModel):
         description="Either atomic or sequential. Used when custon van der Waals radii are used to construct pcm cavity",
     )
 
-    van_der_waals: Optional[Dict[str, Any]] = Field(
+    van_der_waals: Optional[dict[str, Any]] = Field(
         None, description="The dictionary of the custom van der Waals radii if used"
     )
 
-    scan_variables: Optional[Dict[str, Any]] = Field(
+    scan_variables: Optional[dict[str, Any]] = Field(
         None,
         description="The dictionary of scan variables for torsions or bond stretches",
     )
 
-    tags: Optional[Union[Dict[str, Any], str]] = Field(
+    tags: Optional[Union[dict[str, Any], str]] = Field(
         None, description="Any tags associated with the QChem calculation."
     )
 
@@ -158,30 +158,30 @@ class CalculationOutput(BaseModel):
         description="optimized geometry of the molecule after calculation in case of opt, optimization or ts",
     )
 
-    mulliken: Optional[Union[List, Dict[str, Any]]] = Field(
+    mulliken: Optional[Union[list, dict[str, Any]]] = Field(
         None, description="Calculate Mulliken charges on the atoms"
     )
 
-    esp: Optional[Union[List, Dict[str, Any]]] = Field(
+    esp: Optional[Union[list, dict[str, Any]]] = Field(
         None,
         description="Calculated charges on the atoms if esp calculation has been performed",
     )
 
-    resp: Optional[Union[List, Dict[str, Any]]] = Field(
+    resp: Optional[Union[list, dict[str, Any]]] = Field(
         None,
         description="Calculated charges on the atoms if resp calculation has been performed",
     )
 
-    nbo_data: Optional[Dict[str, Any]] = Field(
+    nbo_data: Optional[dict[str, Any]] = Field(
         None, description="NBO data if analysis has been performed."
     )
 
-    frequencies: Optional[Union[Dict[str, Any], List]] = Field(
+    frequencies: Optional[Union[dict[str, Any], list]] = Field(
         None,
         description="Calculated frequency modes if the job type is freq or frequency",
     )
 
-    frequency_modes: Optional[Union[List, str]] = Field(
+    frequency_modes: Optional[Union[list, str]] = Field(
         None, description="The list of calculated frequency mode vectors"
     )
 
@@ -200,21 +200,21 @@ class CalculationOutput(BaseModel):
         description="The total entropy of the system if a frequency calculation has been performed",
     )
 
-    scan_energies: Optional[Dict[str, Any]] = Field(
+    scan_energies: Optional[dict[str, Any]] = Field(
         None,
         description="A dictionary of the scan energies with their respective parameters",
     )
 
-    scan_geometries: Optional[Union[List, Dict[str, Any]]] = Field(
+    scan_geometries: Optional[Union[list, dict[str, Any]]] = Field(
         None, description="optimized geometry of the molecules after the geometric scan"
     )
 
-    scan_molecules: Optional[Union[List, Dict[str, Any], Molecule]] = Field(
+    scan_molecules: Optional[Union[list, dict[str, Any], Molecule]] = Field(
         None,
         description="The constructed pymatgen molecules from the optimized scan geometries",
     )
 
-    pcm_gradients: Optional[Union[Dict[str, Any], np.ndarray, List]] = Field(
+    pcm_gradients: Optional[Union[dict[str, Any], np.ndarray, list]] = Field(
         None,
         description="The parsed total gradients after adding the PCM contributions.",
     )
@@ -222,30 +222,30 @@ class CalculationOutput(BaseModel):
     @field_validator("pcm_gradients", mode="before")
     @classmethod
     def validate_pcm_gradients(cls, v):
-        if v is not None and not isinstance(v, (np.ndarray, Dict, List)):
+        if v is not None and not isinstance(v, (np.ndarray, dict, list)):
             raise ValueError(
                 "pcm_gradients must be a numpy array, a dict or a list or None."
             )
         return v
 
-    cds_gradients: Optional[Union[Dict[str, Any], np.ndarray, List]] = Field(
+    cds_gradients: Optional[Union[dict[str, Any], np.ndarray, list]] = Field(
         None, description="The parsed CDS gradients."
     )
 
     @field_validator("cds_gradients", mode="before")
     @classmethod
     def validate_cds_gradients(cls, v):
-        if v is not None and not isinstance(v, (np.ndarray, Dict, List)):
+        if v is not None and not isinstance(v, (np.ndarray, dict, list)):
             raise ValueError(
                 "cds_gradients must be a numpy array, a dict or a list or None."
             )
         return v
 
-    dipoles: Optional[Dict[str, Any]] = Field(
+    dipoles: Optional[dict[str, Any]] = Field(
         None, description="The associated dipoles for Mulliken/RESP/ESP charges"
     )
 
-    gap_info: Optional[Dict[str, Any]] = Field(
+    gap_info: Optional[dict[str, Any]] = Field(
         None, description="The Kohn-Sham HOMO-LUMO gaps and associated Eigenvalues"
     )
 
@@ -286,7 +286,7 @@ class CalculationOutput(BaseModel):
             gap_info=qcoutput.data.get("gap_info", None),
         )
 
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    model_config = Configdict(arbitrary_types_allowed=True)
     # TODO What can be done for the trajectories, also how will walltime and cputime be reconciled
 
 
@@ -313,7 +313,7 @@ class Calculation(BaseModel):
         None,
         description="Name of task given by custodian (e.g. opt1, opt2, freq1, freq2)",
     )
-    output_file_paths: Dict[str, Union[str, Path, Dict[str, Path]]] = Field(
+    output_file_paths: dict[str, Union[str, Path, dict[str, Path]]] = Field(
         None,
         description="Paths (relative to dir_name) of the QChem output files associated with this calculation",
     )
@@ -343,8 +343,8 @@ class Calculation(BaseModel):
         qcoutput_file: Union[Path, str],
         validate_lot: bool = True,
         store_energy_trajectory: bool = False,
-        qcinput_kwargs: Optional[Dict] = None,
-        qcoutput_kwargs: Optional[Dict] = None,
+        qcinput_kwargs: Optional[dict] = None,
+        qcoutput_kwargs: Optional[dict] = None,
     ) -> "Calculation":
         """
         Create a QChem calculation document from a directory and file paths.
@@ -421,7 +421,7 @@ class Calculation(BaseModel):
 
 def _find_qchem_files(
     path: Union[str, Path],
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Find QChem files in a directory.
 
@@ -436,7 +436,7 @@ def _find_qchem_files(
 
     Returns
     -------
-    Dict[str, Any]
+    dict[str, Any]
         The filenames of the calculation outputs for each QChem task, given as a ordered dictionary of::
 
             {
@@ -512,7 +512,7 @@ def level_of_theory(
     based on the input parameters given to Q-Chem
 
     Args:
-        parameters: Dict of Q-Chem input parameters
+        parameters: dict of Q-Chem input parameters
 
     """
 
@@ -597,7 +597,7 @@ def solvent(
     Returns the solvent used for this calculation.
 
     Args:
-        parameters: Dict of Q-Chem input parameters
+        parameters: dict of Q-Chem input parameters
         custom_smd: (Optional) string representing SMD parameters for a
         non-standard solvent
     """
@@ -668,7 +668,7 @@ def lot_solvent_string(
     Returns a string representation of the level of theory and solvent used for this calculation.
 
     Args:
-        parameters: Dict of Q-Chem input parameters
+        parameters: dict of Q-Chem input parameters
         custom_smd: (Optional) string representing SMD parameters for a
         non-standard solvent
     """

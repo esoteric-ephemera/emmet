@@ -1,4 +1,4 @@
-from typing import List
+from typing import list
 from datetime import datetime
 from fastapi import Query, Body
 from emmet.core._messages import MessageType
@@ -19,7 +19,7 @@ class MessagesPostQuery(QueryOperator):
             ...,
             title="Message text body",
         ),
-        authors: List[str] = Body(
+        authors: list[str] = Body(
             [],
             title="Message authors",
         ),

@@ -54,7 +54,7 @@ class BasicDescriptorsBuilder(MapBuilder):
         self.materials = materials
         self.descriptors = descriptors
 
-        # Set up all targeted site descriptors.
+        # set up all targeted site descriptors.
         self.sds = {}
         for nn in nn_target_classes:
             nn_ = getattr(local_env, nn)
@@ -68,7 +68,7 @@ class BasicDescriptorsBuilder(MapBuilder):
         )
         self.all_output_pieces["statistics"] = ["csf"]
 
-        # Set up all targeted composition descriptors.
+        # set up all targeted composition descriptors.
         self.cds = {}
         self.cds["magpie"] = ElementProperty.from_preset("magpie")
         self.all_output_pieces["composition_descriptors"] = ["magpie"]

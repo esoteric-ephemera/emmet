@@ -1,4 +1,3 @@
-from typing import List
 from hashlib import blake2b
 
 from pydantic import Field
@@ -24,7 +23,7 @@ class PartialChargesDoc(PropertyDoc):
         ..., description="Method used to compute atomic partial charges"
     )
 
-    partial_charges: List[float] = Field(
+    partial_charges: list[float] = Field(
         ..., description="Atomic partial charges for the molecule"
     )
 
@@ -33,7 +32,7 @@ class PartialChargesDoc(PropertyDoc):
         cls,
         task: TaskDocument,
         molecule_id: MPculeID,
-        preferred_methods: List[str],
+        preferred_methods: list[str],
         deprecated: bool = False,
         **kwargs,
     ):  # type: ignore[override]
@@ -111,7 +110,7 @@ class PartialSpinsDoc(PropertyDoc):
 
     method: str = Field(..., description="Method used to compute atomic partial spins")
 
-    partial_spins: List[float] = Field(
+    partial_spins: list[float] = Field(
         ..., description="Atomic partial spins for the molecule"
     )
 
@@ -120,7 +119,7 @@ class PartialSpinsDoc(PropertyDoc):
         cls,
         task: TaskDocument,
         molecule_id: MPculeID,
-        preferred_methods: List[str],
+        preferred_methods: list[str],
         deprecated: bool = False,
         **kwargs,
     ):  # type: ignore[override]

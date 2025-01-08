@@ -1,7 +1,7 @@
 # mypy: ignore-errors
 
 """ Core definition of a Q-Chem Task Document """
-from typing import Any, Dict, List, Optional, Callable
+from typing import Any, dict, list, Optional, Callable
 
 from pydantic import BaseModel, Field
 from pymatgen.core.structure import Molecule
@@ -55,22 +55,22 @@ class OutputSummary(BaseModel):
         None, description="Total entropy of the molecule (units: cal/mol-K"
     )
 
-    mulliken: Optional[List[Any]] = Field(
+    mulliken: Optional[list[Any]] = Field(
         None, description="Mulliken atomic partial charges and partial spins"
     )
-    resp: Optional[List[float]] = Field(
+    resp: Optional[list[float]] = Field(
         None,
         description="Restrained Electrostatic Potential (RESP) atomic partial charges",
     )
-    nbo: Optional[Dict[str, Any]] = Field(
+    nbo: Optional[dict[str, Any]] = Field(
         None, description="Natural Bonding Orbital (NBO) output"
     )
 
-    frequencies: Optional[List[float]] = Field(
+    frequencies: Optional[list[float]] = Field(
         None, description="Vibrational frequencies of the molecule (units: cm^-1)"
     )
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> dict[str, Any]:
         return {
             "@module": self.__class__.__module__,
             "@class": self.__class__.__name__,
@@ -104,16 +104,16 @@ class TaskDocument(BaseTaskDocument, MoleculeMetadata):
         None, description="The real elapsed time in seconds"
     )
 
-    calcs_reversed: List[Dict] = Field(
+    calcs_reversed: list[dict] = Field(
         [], description="The 'raw' calculation docs used to assembled this task"
     )
 
-    orig: Dict[str, Any] = Field(
+    orig: dict[str, Any] = Field(
         {}, description="Summary of the original Q-Chem inputs"
     )
     output: OutputSummary = Field(OutputSummary())
 
-    critic2: Optional[Dict[str, Any]] = Field(
+    critic2: Optional[dict[str, Any]] = Field(
         None, description="Output from Critic2 critical point analysis code"
     )
     custom_smd: Optional[str] = Field(
@@ -142,11 +142,11 @@ class TaskDocument(BaseTaskDocument, MoleculeMetadata):
     )
 
     # TODO - type of `tags` field seems to differ among task databases
-    # sometimes List, sometimes Dict
+    # sometimes list, sometimes dict
     # left as Any here to ensure tags don't cause validation to fail.
     tags: Optional[Any] = Field(None, description="Metadata tags")
 
-    warnings: Optional[Dict[str, bool]] = Field(
+    warnings: Optional[dict[str, bool]] = Field(
         None, description="Any warnings related to this task document"
     )
 
@@ -171,7 +171,7 @@ class TaskDocument(BaseTaskDocument, MoleculeMetadata):
         return calc_type(self.special_run_type, self.orig)
 
     @property
-    def entry(self) -> Dict[str, Any]:
+    def entry(self) -> dict[str, Any]:
         if self.output.optimized_molecule is not None:
             mol = self.output.optimized_molecule
         else:
@@ -215,14 +215,14 @@ class TaskDocument(BaseTaskDocument, MoleculeMetadata):
 
 
 def filter_task_type(
-    entries: List[Dict[str, Any]],
+    entries: list[dict[str, Any]],
     task_type: TaskType,
     sort_by: Optional[Callable] = None,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """
     Filter (and sort) TaskDocument entries based on task type
 
-    :param entries: List of TaskDocument entry dicts
+    :param entries: list of TaskDocument entry dicts
     :param TaskType: TaskType to accept
     :param sort_by: Function used to sort (default None)
     :return: Filtered (sorted) list of entries

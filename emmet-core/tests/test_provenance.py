@@ -4,7 +4,7 @@ import pytest
 from pymatgen.core import Lattice, Structure
 from pymatgen.util.provenance import Author, HistoryNode, StructureNL
 
-from emmet.core.provenance import Database, ProvenanceDoc, SNLDict
+from emmet.core.provenance import Database, ProvenanceDoc, SNLdict
 
 
 @pytest.fixture
@@ -30,7 +30,7 @@ def snls(structure):
     docs[1]["snl_id"] = "user-1"
     docs[2]["snl_id"] = "pf-3"
 
-    return [SNLDict(**d) for d in docs]
+    return [SNLdict(**d) for d in docs]
 
 
 def test_from_snls(snls, structure):

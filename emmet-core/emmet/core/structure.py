@@ -1,7 +1,7 @@
 """Core definition of Structure and Molecule metadata."""
 from __future__ import annotations
 
-from typing import List, Optional, Type, TypeVar
+from typing import Optional, Type, TypeVar
 
 from pydantic import Field
 from pymatgen.core.composition import Composition
@@ -22,8 +22,8 @@ class StructureMetadata(EmmetBaseModel):
     nsites: Optional[int] = Field(
         None, description="Total number of sites in the structure."
     )
-    elements: Optional[List[Element]] = Field(
-        None, description="List of elements in the material."
+    elements: Optional[list[Element]] = Field(
+        None, description="list of elements in the material."
     )
     nelements: Optional[int] = Field(None, description="Number of elements.")
     composition: Optional[Composition] = Field(
@@ -73,7 +73,7 @@ class StructureMetadata(EmmetBaseModel):
     def from_composition(
         cls: Type[T],
         composition: Composition,
-        fields: Optional[List[str]] = None,
+        fields: Optional[list[str]] = None,
         **kwargs,
     ) -> T:
         fields = (
@@ -109,7 +109,7 @@ class StructureMetadata(EmmetBaseModel):
     def from_structure(
         cls: Type[T],
         meta_structure: Structure,
-        fields: Optional[List[str]] = None,
+        fields: Optional[list[str]] = None,
         **kwargs,
     ) -> T:
         fields = (
@@ -162,8 +162,8 @@ class MoleculeMetadata(EmmetBaseModel):
     natoms: Optional[int] = Field(
         None, description="Total number of atoms in the molecule"
     )
-    elements: Optional[List[Element]] = Field(
-        None, description="List of elements in the molecule"
+    elements: Optional[list[Element]] = Field(
+        None, description="list of elements in the molecule"
     )
     nelements: Optional[int] = Field(None, title="Number of Elements")
     nelectrons: Optional[int] = Field(
@@ -207,7 +207,7 @@ class MoleculeMetadata(EmmetBaseModel):
     def from_composition(
         cls: Type[S],
         comp: Composition,
-        fields: Optional[List[str]] = None,
+        fields: Optional[list[str]] = None,
         **kwargs,
     ) -> S:
         """
@@ -260,7 +260,7 @@ class MoleculeMetadata(EmmetBaseModel):
     def from_molecule(
         cls: Type[S],
         meta_molecule: Molecule,
-        fields: Optional[List[str]] = None,
+        fields: Optional[list[str]] = None,
         **kwargs,
     ) -> S:
         fields = (

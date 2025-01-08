@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -34,9 +34,9 @@ class SimilarityDoc(BaseModel):
     Model for a document containing structure similarity data
     """
 
-    sim: Optional[List[SimilarityEntry]] = Field(
+    sim: Optional[list[SimilarityEntry]] = Field(
         None,
-        description="List containing similar structure data for a given material.",
+        description="list containing similar structure data for a given material.",
     )
 
     material_id: Optional[str] = Field(

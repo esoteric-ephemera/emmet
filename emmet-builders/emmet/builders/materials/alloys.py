@@ -1,5 +1,5 @@
 from itertools import chain, combinations
-from typing import Dict, List, Tuple, Union
+from typing import Union
 
 from maggma.builders import Builder
 from matminer.datasets import load_dataset
@@ -274,7 +274,7 @@ class AlloyPairMemberBuilder(Builder):
             if structures:
                 yield (pairs, structures)
 
-    def process_item(self, item: Tuple[List[AlloyPair], Dict[str, Structure]]):
+    def process_item(self, item: tuple[list[AlloyPair], dict[str, Structure]]):
         pairs, structures = item
 
         all_pair_members = []

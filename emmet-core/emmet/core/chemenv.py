@@ -1,4 +1,4 @@
-from typing import Literal, List, Union, Optional
+from typing import Literal, Union, Optional
 
 from pydantic import Field
 from pymatgen.analysis.chemenv.coordination_environments.chemenv_strategies import (
@@ -322,36 +322,36 @@ class ChemEnvDoc(PropertyDoc):
         description="The structure used in the generation of the chemical environment data",
     )
 
-    valences: List[Union[int, float]] = Field(
-        description="List of valences for each site in this material to determine cations"
+    valences: list[Union[int, float]] = Field(
+        description="list of valences for each site in this material to determine cations"
     )
 
-    species: List[str] = Field(
-        description="List of unique (cationic) species in structure."
+    species: list[str] = Field(
+        description="list of unique (cationic) species in structure."
     )
 
-    chemenv_symbol: List[COORDINATION_GEOMETRIES] = Field(
-        description="List of ChemEnv symbols for unique (cationic) species in structure"
+    chemenv_symbol: list[COORDINATION_GEOMETRIES] = Field(
+        description="list of ChemEnv symbols for unique (cationic) species in structure"
     )
 
-    chemenv_iupac: List[COORDINATION_GEOMETRIES_IUPAC] = Field(
-        description="List of symbols for unique (cationic) species in structure in IUPAC format"
+    chemenv_iupac: list[COORDINATION_GEOMETRIES_IUPAC] = Field(
+        description="list of symbols for unique (cationic) species in structure in IUPAC format"
     )
 
-    chemenv_iucr: List[COORDINATION_GEOMETRIES_IUCR] = Field(
-        description="List of symbols for unique (cationic) species in structure in IUCR format"
+    chemenv_iucr: list[COORDINATION_GEOMETRIES_IUCR] = Field(
+        description="list of symbols for unique (cationic) species in structure in IUCR format"
     )
 
-    chemenv_name: List[COORDINATION_GEOMETRIES_NAMES] = Field(
-        description="List of text description of coordination environment for unique (cationic) species in structure."
+    chemenv_name: list[COORDINATION_GEOMETRIES_NAMES] = Field(
+        description="list of text description of coordination environment for unique (cationic) species in structure."
     )
-    chemenv_name_with_alternatives: List[
+    chemenv_name_with_alternatives: list[
         COORDINATION_GEOMETRIES_NAMES_WITH_ALTERNATIVES
     ] = Field(
-        description="List of text description of coordination environment including alternative descriptions for unique (cationic) species in structure."  # noqa: E501
+        description="list of text description of coordination environment including alternative descriptions for unique (cationic) species in structure."  # noqa: E501
     )
 
-    csm: List[Union[float, None]] = Field(
+    csm: list[Union[float, None]] = Field(
         description="Saves the continous symmetry measures for unique (cationic) species in structure"
     )
 
@@ -359,16 +359,16 @@ class ChemEnvDoc(PropertyDoc):
         description="Method used to compute chemical environments"
     )
 
-    mol_from_site_environments: List[Union[Molecule, None]] = Field(
-        description="List of Molecule Objects describing the detected environment."
+    mol_from_site_environments: list[Union[Molecule, None]] = Field(
+        description="list of Molecule Objects describing the detected environment."
     )
 
     # structure_environment: Union[StructureEnvironments, None] = Field(
     #     description="Structure environment object"
     # )
 
-    wyckoff_positions: List[str] = Field(
-        description="List of Wyckoff positions for unique (cationic) species in structure."
+    wyckoff_positions: list[str] = Field(
+        description="list of Wyckoff positions for unique (cationic) species in structure."
     )
 
     warnings: Optional[str] = Field(None, description="Warning")

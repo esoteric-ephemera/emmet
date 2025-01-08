@@ -1,6 +1,5 @@
 """ Core definition of Spectrum document """
 from datetime import datetime
-from typing import List
 
 from pydantic import Field
 
@@ -33,6 +32,6 @@ class SpectrumDoc(StructureMetadata):
         default_factory=datetime.utcnow,
     )
 
-    warnings: List[str] = Field(
+    warnings: list[str] = Field(
         [], description="Any warnings related to this property."
     )

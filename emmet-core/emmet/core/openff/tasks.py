@@ -10,7 +10,7 @@ from typing import Optional
 from monty.json import MSONable
 from pydantic import (
     BaseModel,
-    ConfigDict,
+    Configdict,
     Field,
     PlainSerializer,
     PlainValidator,
@@ -110,7 +110,7 @@ class MDTaskDocument(BaseModel):  # type: ignore[call-arg]
         description="Timestamp for the most recent calculation for this task document",
     )
 
-    model_config = ConfigDict(extra="allow")
+    model_config = Configdict(extra="allow")
 
 
 class ClassicalMDTaskDocument(MDTaskDocument):

@@ -1,7 +1,8 @@
 from datetime import datetime
 from itertools import chain
 from math import ceil
-from typing import Optional, Iterable, Iterator, List, Dict
+from typing import Optional
+from collections.abc import Iterable, Iterator
 import copy
 
 from pymatgen.core.structure import Molecule
@@ -17,12 +18,12 @@ from emmet.core.molecules.bonds import MoleculeBondingDoc, metals
 from emmet.core.molecules.thermo import MoleculeThermoDoc
 from emmet.core.molecules.metal_binding import MetalBindingDoc, METAL_BINDING_METHODS
 from emmet.core.utils import jsanitize
-from emmet.builders.settings import EmmetBuildSettings
+from emmet.builders.settings import EmmetBuildsettings
 
 
 __author__ = "Evan Spotte-Smith"
 
-SETTINGS = EmmetBuildSettings()
+SETTINGS = EmmetBuildsettings()
 
 
 class MetalBindingBuilder(Builder):
@@ -73,9 +74,9 @@ class MetalBindingBuilder(Builder):
         bonds: Store,
         thermo: Store,
         metal_binding: Store,
-        query: Optional[Dict] = None,
-        methods: Optional[List] = None,
-        settings: Optional[EmmetBuildSettings] = None,
+        query: Optional[dict] = None,
+        methods: Optional[list] = None,
+        settings: Optional[EmmetBuildsettings] = None,
         **kwargs,
     ):
         self.molecules = molecules
@@ -86,7 +87,7 @@ class MetalBindingBuilder(Builder):
         self.metal_binding = metal_binding
         self.query = query if query else dict()
         self.methods = methods if methods else METAL_BINDING_METHODS
-        self.settings = EmmetBuildSettings.autoload(settings)
+        self.settings = EmmetBuildsettings.autoload(settings)
         self.kwargs = kwargs
 
         super().__init__(
@@ -160,7 +161,7 @@ class MetalBindingBuilder(Builder):
         self.metal_binding.ensure_index("formula_alphabetical")
         self.metal_binding.ensure_index("method")
 
-    def prechunk(self, number_splits: int) -> Iterable[Dict]:  # pragma: no cover
+    def prechunk(self, number_splits: int) -> Iterable[dict]:  # pragma: no cover
         """Prechunk the builder for distributed computation"""
 
         temp_query = dict(self.query)
@@ -186,7 +187,7 @@ class MetalBindingBuilder(Builder):
         for formula_chunk in grouper(to_process_forms, N):
             yield {"query": {"formula_alphabetical": {"$in": list(formula_chunk)}}}
 
-    def get_items(self) -> Iterator[List[Dict]]:
+    def get_items(self) -> Iterator[list[dict]]:
         """
         Gets all items to process into metal_binding documents.
 
@@ -195,7 +196,7 @@ class MetalBindingBuilder(Builder):
         """
 
         self.logger.info("Metal binding builder started")
-        self.logger.info("Setting indexes")
+        self.logger.info("setting indexes")
         self.ensure_indexes()
 
         # Save timestamp to mark buildtime
@@ -223,7 +224,7 @@ class MetalBindingBuilder(Builder):
         self.logger.info(f"Found {len(to_process_docs)} unprocessed documents")
         self.logger.info(f"Found {len(to_process_forms)} unprocessed formulas")
 
-        # Set total for builder bars to have a total
+        # set total for builder bars to have a total
         self.total = len(to_process_forms)
 
         for formula in to_process_forms:
@@ -233,12 +234,12 @@ class MetalBindingBuilder(Builder):
 
             yield molecules
 
-    def process_item(self, items: List[Dict]) -> List[Dict]:
+    def process_item(self, items: list[dict]) -> list[dict]:
         """
         Process molecule, bonding, partial charges, partial spins, and thermo documents into MetalBindingDocs
 
         Args:
-            tasks List[Dict] : a list of MoleculeDocs in dict form
+            tasks list[dict] : a list of MoleculeDocs in dict form
 
         Returns:
             [dict] : a list of new metal binding docs
@@ -492,7 +493,7 @@ class MetalBindingBuilder(Builder):
 
         return jsanitize([doc.model_dump() for doc in binding_docs], allow_bson=True)
 
-    def update_targets(self, items: List[List[Dict]]):
+    def update_targets(self, items: list[list[dict]]):
         """
         Inserts the new documents into the metal_binding collection
 

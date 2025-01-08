@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, Union
+from typing import Any, Optional, Union
 from fastapi import Query
 from maggma.api.query_operator import QueryOperator
 from maggma.api.utils import STORE_PARAMS
@@ -76,7 +76,7 @@ class BindingDataQuery(QueryOperator):
             None, description="Maximum binding free energy (units: eV)"
         ),
     ) -> STORE_PARAMS:
-        crit: Dict[str, Any] = dict()  # type: ignore
+        crit: dict[str, Any] = dict()  # type: ignore
 
         if metal_element:
             crit["binding_data.metal_element"] = metal_element

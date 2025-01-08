@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Dict, List, Optional, TypeVar, Union
+from typing import Optional, TypeVar, Union
 
 from pydantic import BaseModel, Field
 from pymatgen.core.periodic_table import Element
@@ -78,10 +78,10 @@ class SummaryStats(BaseModel):
     mean: Optional[float] = Field(
         None, title="Mean", description="The mean of the field values."
     )
-    distribution: Optional[List[float]] = Field(
+    distribution: Optional[list[float]] = Field(
         None,
         title="Distribution",
-        description="List of floats specifying a kernel density "
+        description="list of floats specifying a kernel density "
         "estimator of the distribution, equally spaced "
         "between specified minimum and maximum values.",
     )
@@ -149,10 +149,10 @@ class SummaryDoc(PropertyDoc):
         description="The lowest energy structure for this material.",
     )
 
-    task_ids: List[MPID] = Field(
+    task_ids: list[MPID] = Field(
         [],
         title="Calculation IDs",
-        description="List of Calculations IDs associated with this material.",
+        description="list of Calculations IDs associated with this material.",
     )
 
     # Thermo
@@ -188,23 +188,23 @@ class SummaryDoc(PropertyDoc):
         " Also known as the inverse distance to hull.",
     )
 
-    decomposes_to: Optional[List[DecompositionProduct]] = Field(
+    decomposes_to: Optional[list[DecompositionProduct]] = Field(
         None,
-        description="List of decomposition data for this material. Only valid for metastable or unstable material.",
+        description="list of decomposition data for this material. Only valid for metastable or unstable material.",
     )
 
     # XAS
 
-    xas: Optional[List[XASSearchData]] = Field(
+    xas: Optional[list[XASSearchData]] = Field(
         None,
-        description="List of xas documents.",
+        description="list of xas documents.",
     )
 
     # GB
 
-    grain_boundaries: Optional[List[GBSearchData]] = Field(
+    grain_boundaries: Optional[list[GBSearchData]] = Field(
         None,
-        description="List of grain boundary documents.",
+        description="list of grain boundary documents.",
     )
 
     # Electronic Structure
@@ -214,12 +214,12 @@ class SummaryDoc(PropertyDoc):
         description="Band gap energy in eV.",
     )
 
-    cbm: Optional[Union[float, Dict]] = Field(
+    cbm: Optional[Union[float, dict]] = Field(
         None,
         description="Conduction band minimum data.",
     )
 
-    vbm: Optional[Union[float, Dict]] = Field(
+    vbm: Optional[Union[float, dict]] = Field(
         None,
         description="Valence band maximum data.",
     )
@@ -303,7 +303,7 @@ class SummaryDoc(PropertyDoc):
         description="The number of unique magnetic sites.",
     )
 
-    types_of_magnetic_species: Optional[List[Element]] = Field(
+    types_of_magnetic_species: Optional[list[Element]] = Field(
         None,
         description="Magnetic specie elements.",
     )
@@ -399,16 +399,16 @@ class SummaryDoc(PropertyDoc):
 
     # Oxi States
 
-    possible_species: Optional[List[str]] = Field(
+    possible_species: Optional[list[str]] = Field(
         None,
         description="Possible charged species in this material.",
     )
 
     # Has Props
 
-    has_props: Optional[Dict[str, bool]] = Field(
+    has_props: Optional[dict[str, bool]] = Field(
         None,
-        description="List of properties that are available for a given material.",
+        description="list of properties that are available for a given material.",
     )
 
     # Theoretical
@@ -420,12 +420,12 @@ class SummaryDoc(PropertyDoc):
 
     # External Database IDs
 
-    database_IDs: Dict[str, List[str]] = Field(
+    database_IDs: dict[str, list[str]] = Field(
         {}, description="External database IDs corresponding to this material."
     )
 
     @classmethod
-    def from_docs(cls, material_id: MPID, **docs: Dict[str, Dict]):
+    def from_docs(cls, material_id: MPID, **docs: dict[str, dict]):
         """Converts a bunch of summary docs into a SummaryDoc"""
         doc = _copy_from_doc(docs)
 
@@ -452,7 +452,7 @@ class SummaryDoc(PropertyDoc):
 
 
 # Key mapping
-summary_fields: Dict[str, list] = {
+summary_fields: dict[str, list] = {
     HasProps.materials.value: [
         "nsites",
         "elements",

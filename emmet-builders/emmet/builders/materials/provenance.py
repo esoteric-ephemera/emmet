@@ -1,15 +1,16 @@
 from collections import defaultdict
+from collections.abc import Iterable
 from datetime import datetime
 from math import ceil
-from typing import Dict, Iterable, List, Optional, Tuple
+from typing import Optional
 
 from maggma.core import Builder, Store
 from maggma.utils import grouper
 from pymatgen.analysis.structure_matcher import ElementComparator, StructureMatcher
 from pymatgen.core.structure import Structure
 
-from emmet.builders.settings import EmmetBuildSettings
-from emmet.core.provenance import ProvenanceDoc, SNLDict
+from emmet.builders.settings import EmmetBuildsettings
+from emmet.core.provenance import ProvenanceDoc, SNLdict
 from emmet.core.utils import get_sg, jsanitize
 
 
@@ -18,9 +19,9 @@ class ProvenanceBuilder(Builder):
         self,
         materials: Store,
         provenance: Store,
-        source_snls: List[Store],
-        settings: Optional[EmmetBuildSettings] = None,
-        query: Optional[Dict] = None,
+        source_snls: list[Store],
+        settings: Optional[EmmetBuildsettings] = None,
+        query: Optional[dict] = None,
         **kwargs,
     ):
         """
@@ -29,13 +30,13 @@ class ProvenanceBuilder(Builder):
         Args:
             materials: Store of materials docs to tag with SNLs
             provenance: Store to update with provenance data
-            source_snls: List of locations to grab SNLs
+            source_snls: list of locations to grab SNLs
             query : query on materials to limit search
         """
         self.materials = materials
         self.provenance = provenance
         self.source_snls = source_snls
-        self.settings = EmmetBuildSettings.autoload(settings)
+        self.settings = EmmetBuildsettings.autoload(settings)
         self.query = query or {}
         self.kwargs = kwargs
 
@@ -59,7 +60,7 @@ class ProvenanceBuilder(Builder):
             s.ensure_index("snl_id")
             s.ensure_index("formula_pretty")
 
-    def prechunk(self, number_splits: int) -> Iterable[Dict]:  # pragma: no cover
+    def prechunk(self, number_splits: int) -> Iterable[dict]:  # pragma: no cover
         self.ensure_indicies()
 
         # Find all formulas for materials that have been updated since this
@@ -101,7 +102,7 @@ class ProvenanceBuilder(Builder):
         for chunk in grouper(mat_ids, N):
             yield {"query": {"material_id": {"$in": chunk}}}
 
-    def get_items(self) -> Tuple[List[Dict], List[Dict]]:  # type: ignore
+    def get_items(self) -> tuple[list[dict], list[dict]]:  # type: ignore
         """
         Gets all materials to assocaite with SNLs
         Returns:
@@ -109,7 +110,7 @@ class ProvenanceBuilder(Builder):
         """
         self.logger.info("Provenance Builder Started")
 
-        self.logger.info("Setting indexes")
+        self.logger.info("setting indexes")
         self.ensure_indicies()
 
         # Find all formulas for materials that have been updated since this
@@ -168,7 +169,7 @@ class ProvenanceBuilder(Builder):
             for snl in snls:
                 struc = Structure.from_dict(snl)
                 snl_sg = get_sg(struc)
-                struc.snl = SNLDict(**snl)  # type: ignore[attr-defined]
+                struc.snl = SNLdict(**snl)  # type: ignore[attr-defined]
                 snl_groups[snl_sg].append(struc)
 
             mat_sg = get_sg(Structure.from_dict(mat["structure"]))
@@ -178,7 +179,7 @@ class ProvenanceBuilder(Builder):
             self.logger.debug(f"Found {len(snl_structs)} potential snls for {mat_id}")
             yield mat, snl_structs
 
-    def process_item(self, item) -> Dict:
+    def process_item(self, item) -> dict:
         """
         Matches SNLS and Materials
         Args:

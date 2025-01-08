@@ -1,4 +1,3 @@
-from typing import List
 
 import numpy as np
 import pytest
@@ -45,7 +44,7 @@ def test_generate_derived_fitting_data(fitting_data, reference_data):
         structure, strains, stresses
     )
 
-    def sequence_of_tensors_equal(a: List[Tensor], b: List[Tensor]):
+    def sequence_of_tensors_equal(a: list[Tensor], b: list[Tensor]):
         mapping = TensorMapping(
             tensors=a, values=[None for _ in range(len(a))], tol=1e-5
         )

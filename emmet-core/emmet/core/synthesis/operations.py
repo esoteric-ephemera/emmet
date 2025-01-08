@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Optional
+from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -7,17 +7,17 @@ from pydantic import BaseModel, Field
 class Value(BaseModel):
     min_value: Optional[float] = Field(None, description="Minimal value.")
     max_value: Optional[float] = Field(None, description="Maximal value.")
-    values: List[float] = Field([], description="Enumerated values in the literature.")
+    values: list[float] = Field([], description="Enumerated values in the literature.")
     units: str = Field(..., description="Unit of this value.")
 
 
 class Conditions(BaseModel):
-    heating_temperature: Optional[List[Value]] = Field(
+    heating_temperature: Optional[list[Value]] = Field(
         None, description="Heating temperatures."
     )
-    heating_time: Optional[List[Value]] = Field(None, description="Heating times.")
-    heating_atmosphere: Optional[List[str]] = Field(
-        None, description="List of heating atmospheres."
+    heating_time: Optional[list[Value]] = Field(None, description="Heating times.")
+    heating_atmosphere: Optional[list[str]] = Field(
+        None, description="list of heating atmospheres."
     )
     mixing_device: Optional[str] = Field(
         None, description="Mixing device, if this operation is MIXING."

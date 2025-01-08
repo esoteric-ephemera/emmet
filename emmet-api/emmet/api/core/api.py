@@ -1,4 +1,3 @@
-from typing import Dict, List
 from maggma.api.resource.core import Resource
 from pymatgen.core import __version__ as pmg_version  # type: ignore
 from emmet.api.core.settings import MAPISettings
@@ -14,7 +13,7 @@ class MAPI(API):
 
     def __init__(
         self,
-        resources: Dict[str, List[Resource]],
+        resources: dict[str, list[Resource]],
         title="Materials Project API",
         version=api_version,
         debug=False,

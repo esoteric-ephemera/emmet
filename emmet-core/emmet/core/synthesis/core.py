@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Optional, Any
+from typing import Optional, Any
 
 from pydantic import BaseModel, Field
 
@@ -37,25 +37,25 @@ class SynthesisRecipe(BaseModel):
     reaction: ReactionFormula = Field(..., description="The balanced reaction formula.")
 
     target: ExtractedMaterial = Field(..., description="The target material.")
-    targets_formula: List[str] = Field(
-        ..., description="List of synthesized target material compositions."
+    targets_formula: list[str] = Field(
+        ..., description="list of synthesized target material compositions."
     )
-    precursors_formula: List[str] = Field(
-        ..., description="List of precursor material compositions."
+    precursors_formula: list[str] = Field(
+        ..., description="list of precursor material compositions."
     )
-    targets_formula_s: List[str] = Field(
-        ..., description="List of synthesized target material compositions, as strings."
+    targets_formula_s: list[str] = Field(
+        ..., description="list of synthesized target material compositions, as strings."
     )
-    precursors_formula_s: List[str] = Field(
-        ..., description="List of precursor material compositions, as strings."
-    )
-
-    precursors: List[ExtractedMaterial] = Field(
-        ..., description="List of precursor materials."
+    precursors_formula_s: list[str] = Field(
+        ..., description="list of precursor material compositions, as strings."
     )
 
-    operations: List[Operation] = Field(
-        ..., description="List of operations used to synthesize this recipe."
+    precursors: list[ExtractedMaterial] = Field(
+        ..., description="list of precursor materials."
+    )
+
+    operations: list[Operation] = Field(
+        ..., description="list of operations used to synthesize this recipe."
     )
 
 
@@ -69,7 +69,7 @@ class SynthesisSearchResultModel(SynthesisRecipe):
         None,
         description="Search score.",
     )
-    highlights: Optional[List[Any]] = Field(
+    highlights: Optional[list[Any]] = Field(
         None,
         description="Search highlights.",
     )

@@ -15,7 +15,7 @@ from pymatgen.electronic_structure.dos import CompleteDos
 from pymatgen.symmetry.bandstructure import HighSymmKpath
 from pymatgen.analysis.structure_matcher import StructureMatcher
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
-from pymatgen.io.vasp.sets import MPStaticSet
+from pymatgen.io.vasp.sets import MPStaticset
 
 from emmet.core.settings import EmmetSettings
 from emmet.core.electronic_structure import ElectronicStructureDoc
@@ -53,7 +53,7 @@ class ElectronicStructureBuilder(Builder):
         dos_fs (Store, str): Store of DOS, or S3 URL string with bucket and prefix
             (e.g. s3://materialsproject-parsed/dos).
         chunk_size (int): Chunk size to use for processing. Defaults to 10.
-        query (dict): Dictionary to limit materials to be analyzed
+        query (dict): dictionary to limit materials to be analyzed
         """
 
         self.tasks = tasks
@@ -274,7 +274,7 @@ class ElectronicStructureBuilder(Builder):
                 )
 
         # LMAXMIX check, VASP default is 2
-        expected_lmaxmix = MPStaticSet(structure).incar.get("LMAXMIX", 2)
+        expected_lmaxmix = MPStaticset(structure).incar.get("LMAXMIX", 2)
         if mat["dos"] and mat["dos"]["lmaxmix"] != expected_lmaxmix:
             doc.warnings.append(
                 "An incorrect calculation parameter may lead to errors in the band gap of "
@@ -297,7 +297,7 @@ class ElectronicStructureBuilder(Builder):
         Inserts electronic structure documents into the electronic_structure collection
 
         Args:
-            items ([Dict]): A list of ElectronicStructureDoc dictionaries to update
+            items ([dict]): A list of ElectronicStructureDoc dictionaries to update
         """
 
         items = list(filter(None, items))

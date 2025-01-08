@@ -2,7 +2,7 @@
 
 from collections import defaultdict
 from datetime import datetime
-from typing import Dict, List, Optional, Union
+from typing import Optional, Union
 
 from pydantic import BaseModel, Field
 from pymatgen.analysis.phase_diagram import PhaseDiagram
@@ -89,9 +89,9 @@ class ThermoDoc(PropertyDoc):
         " Also known as the inverse distance to hull.",
     )
 
-    decomposes_to: Optional[List[DecompositionProduct]] = Field(
+    decomposes_to: Optional[list[DecompositionProduct]] = Field(
         None,
-        description="List of decomposition data for this material. Only valid for metastable or unstable material.",
+        description="list of decomposition data for this material. Only valid for metastable or unstable material.",
     )
 
     decomposition_enthalpy: Optional[float] = Field(
@@ -99,9 +99,9 @@ class ThermoDoc(PropertyDoc):
         description="Decomposition enthalpy as defined by `get_decomp_and_phase_separation_energy` in pymatgen.",
     )
 
-    decomposition_enthalpy_decomposes_to: Optional[List[DecompositionProduct]] = Field(
+    decomposition_enthalpy_decomposes_to: Optional[list[DecompositionProduct]] = Field(
         None,
-        description="List of decomposition data associated with the decomposition_enthalpy quantity.",
+        description="list of decomposition data associated with the decomposition_enthalpy quantity.",
     )
 
     energy_type: str = Field(
@@ -109,20 +109,20 @@ class ThermoDoc(PropertyDoc):
         description="The type of calculation this energy evaluation comes from.",
     )
 
-    entry_types: List[str] = Field(
-        description="List of available energy types computed for this material."
+    entry_types: list[str] = Field(
+        description="list of available energy types computed for this material."
     )
 
-    entries: Dict[str, Union[ComputedEntry, ComputedStructureEntry]] = Field(
+    entries: dict[str, Union[ComputedEntry, ComputedStructureEntry]] = Field(
         ...,
-        description="List of all entries that are valid for this material."
+        description="list of all entries that are valid for this material."
         " The keys for this dictionary are names of various calculation types.",
     )
 
     @classmethod
     def from_entries(
         cls,
-        entries: List[Union[ComputedEntry, ComputedStructureEntry]],
+        entries: list[Union[ComputedEntry, ComputedStructureEntry]],
         thermo_type: Union[ThermoType, RunType],
         phase_diagram: Optional[PhaseDiagram] = None,
         use_max_chemsys: bool = False,
@@ -131,14 +131,14 @@ class ThermoDoc(PropertyDoc):
         """Produce a list of ThermoDocs from a list of Entry objects
 
         Args:
-            entries (List[Union[ComputedEntry, ComputedStructureEntry]]): List of Entry objects
+            entries (list[Union[ComputedEntry, ComputedStructureEntry]]): list of Entry objects
             thermo_type (Union[ThermoType, RunType]): Thermo type
             phase_diagram (Optional[PhaseDiagram], optional): Already built phase diagram. Defaults to None.
             use_max_chemsys (bool, optional): Whether to only produce thermo docs for materials
                 that match the largest chemsys represented in the list. Defaults to False.
 
         Returns:
-            List[ThermoDoc]: List of built thermo doc objects.
+            list[ThermoDoc]: list of built thermo doc objects.
         """
 
         pd = phase_diagram or cls.construct_phase_diagram(entries)
@@ -270,7 +270,7 @@ class ThermoDoc(PropertyDoc):
         represented in the entry data passed.
 
         Args:
-            entries (List[ComputedStructureEntry]): List of corrected pymatgen entry objects.
+            entries (list[ComputedStructureEntry]): list of corrected pymatgen entry objects.
 
         Returns:
             PhaseDiagram: Pymatgen PhaseDiagram object

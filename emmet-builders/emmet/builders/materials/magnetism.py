@@ -1,5 +1,6 @@
 from math import ceil
-from typing import Dict, Iterator, Optional
+from typing import Optional
+from collections.abc import Iterator
 
 from maggma.builders import Builder
 from maggma.stores import Store
@@ -18,7 +19,7 @@ class MagneticBuilder(Builder):
         materials: Store,
         magnetism: Store,
         tasks: Store,
-        query: Optional[Dict] = None,
+        query: Optional[dict] = None,
         **kwargs,
     ):
         """
@@ -42,7 +43,7 @@ class MagneticBuilder(Builder):
 
         super().__init__(sources=[materials, tasks], targets=[magnetism], **kwargs)
 
-    def prechunk(self, number_splits: int) -> Iterator[Dict]:  # pragma: no cover
+    def prechunk(self, number_splits: int) -> Iterator[dict]:  # pragma: no cover
         """
         Prechunk method to perform chunking by the key field
         """

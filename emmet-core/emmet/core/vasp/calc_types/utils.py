@@ -1,7 +1,7 @@
 """Module to define various calculation types as Enums for VASP."""
 
 from pathlib import Path
-from typing import Dict, Literal
+from typing import Literal
 
 from monty.serialization import loadfn
 
@@ -14,14 +14,14 @@ _RUN_TYPE_DATA = loadfn(
 __all__ = ["run_type", "task_type", "calc_type"]
 
 
-def run_type(parameters: Dict) -> RunType:
+def run_type(parameters: dict) -> RunType:
     """
     Determine run type from the VASP parameters dict.
 
     This is adapted from pymatgen to be far less unstable
 
     Args:
-        parameters: Dictionary of VASP parameters from vasprun.xml.
+        parameters: dictionary of VASP parameters from vasprun.xml.
 
     Returns:
         The run type.
@@ -52,7 +52,7 @@ def run_type(parameters: Dict) -> RunType:
 
 
 def task_type(
-    inputs: Dict[Literal["incar", "poscar", "kpoints", "potcar"], Dict]
+    inputs: dict[Literal["incar", "poscar", "kpoints", "potcar"], dict]
 ) -> TaskType:
     """
     Determine task type from vasp inputs.
@@ -125,15 +125,15 @@ def task_type(
 
 
 def calc_type(
-    inputs: Dict[Literal["incar", "poscar", "kpoints", "potcar"], Dict],
-    parameters: Dict,
+    inputs: dict[Literal["incar", "poscar", "kpoints", "potcar"], dict],
+    parameters: dict,
 ) -> CalcType:
     """
     Determine the calc type.
 
     Args:
         inputs: inputs dict with an incar, kpoints, potcar, and poscar dictionaries.
-        parameters: Dictionary of VASP parameters from vasprun.xml.
+        parameters: dictionary of VASP parameters from vasprun.xml.
 
     Returns:
         The calc type.

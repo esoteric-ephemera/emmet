@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 from pydantic import BaseModel, Field
 
 
@@ -47,12 +47,12 @@ class ElasticityData(BaseModel):
         description="Poisson's ratio.",
     )
 
-    elastic_tensor: Optional[List[List[float]]] = Field(
+    elastic_tensor: Optional[list[list[float]]] = Field(
         None,
         description="Stiffness tensor in GPa.",
     )
 
-    compliance_tensor: Optional[List[List[float]]] = Field(
+    compliance_tensor: Optional[list[list[float]]] = Field(
         None,
         description="Compliance tensor in 10^(-12)/Pa.",
     )

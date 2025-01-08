@@ -1,4 +1,4 @@
-from typing import Optional, Dict, Iterable
+from typing import Optional, Iterable
 from emmet.core.mpid import MPID
 from maggma.core.store import Store
 from maggma.core.builder import Builder
@@ -17,7 +17,7 @@ class SubstratesBuilder(Builder):
         materials: Store,
         substrates: Store,
         elasticity: Store,
-        query: Optional[Dict] = None,
+        query: Optional[dict] = None,
         **kwargs,
     ):
         """
@@ -47,7 +47,7 @@ class SubstratesBuilder(Builder):
             **kwargs,
         )
 
-    def prechunk(self, number_splits: int) -> Iterable[Dict]:  # pragma: no cover
+    def prechunk(self, number_splits: int) -> Iterable[dict]:  # pragma: no cover
         to_process_mat_ids = self._find_to_process()
 
         return [
@@ -164,7 +164,7 @@ class SubstratesBuilder(Builder):
     def _find_to_process(self):
         self.logger.info("Substrate Builder Started")
 
-        self.logger.info("Setting up indicies")
+        self.logger.info("setting up indicies")
         self.ensure_indicies()
 
         mat_keys = set(self.materials.distinct("material_id", criteria=self.query))

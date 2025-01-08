@@ -1,6 +1,7 @@
 """ Core definition of a Materials Document """
 
-from typing import Dict, List, Mapping, Optional
+from collections.abc import Mapping
+from typing import Optional
 
 from pydantic import BaseModel, Field
 from pymatgen.analysis.structure_analyzer import SpacegroupAnalyzer
@@ -41,19 +42,19 @@ class MaterialsDoc(CoreMaterialsDoc, StructureMetadata):
         description="Run types for all the calculations that make up this material",
     )
 
-    origins: Optional[List[PropertyOrigin]] = Field(
+    origins: Optional[list[PropertyOrigin]] = Field(
         None, description="Mappingionary for tracking the provenance of properties"
     )
 
     entries: Optional[BlessedCalcs] = Field(
-        None, description="Dictionary for tracking entries for VASP calculations"
+        None, description="dictionary for tracking entries for VASP calculations"
     )
 
     @classmethod
     def from_tasks(
         cls,
-        task_group: List[TaskDoc],
-        structure_quality_scores: Dict[
+        task_group: list[TaskDoc],
+        structure_quality_scores: dict[
             str, int
         ] = SETTINGS.VASP_STRUCTURE_QUALITY_SCORES,
         use_statics: bool = SETTINGS.VASP_USE_STATICS,
@@ -63,7 +64,7 @@ class MaterialsDoc(CoreMaterialsDoc, StructureMetadata):
         Converts a group of tasks into one material
 
         Args:
-            task_group: List of task document
+            task_group: list of task document
             structure_quality_scores: quality scores for various calculation types
             use_statics: Use statics to define a material
             commercial_license: Whether the data should be licensed with BY-C (otherwise BY-NC).
@@ -239,14 +240,14 @@ class MaterialsDoc(CoreMaterialsDoc, StructureMetadata):
     @classmethod
     def construct_deprecated_material(
         cls,
-        task_group: List[TaskDoc],
+        task_group: list[TaskDoc],
         commercial_license: bool = True,
     ) -> "MaterialsDoc":
         """
         Converts a group of tasks into a deprecated material
 
         Args:
-            task_group: List of task document
+            task_group: list of task document
             commercial_license: Whether the data should be licensed with BY-C (otherwise BY-NC).
         """
         if len(task_group) == 0:

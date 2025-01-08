@@ -2,7 +2,8 @@ from collections import defaultdict
 from datetime import datetime
 from itertools import chain
 from math import ceil
-from typing import Optional, Iterable, Iterator, List, Dict
+from typing import Optional
+from collections.abc import Iterable, Iterator
 
 from maggma.builders import Builder
 from maggma.core import Store
@@ -12,12 +13,12 @@ from emmet.core.qchem.task import TaskDocument
 from emmet.core.qchem.molecule import MoleculeDoc, evaluate_lot
 from emmet.core.molecules.orbitals import OrbitalDoc
 from emmet.core.utils import jsanitize
-from emmet.builders.settings import EmmetBuildSettings
+from emmet.builders.settings import EmmetBuildsettings
 
 
 __author__ = "Evan Spotte-Smith"
 
-SETTINGS = EmmetBuildSettings()
+SETTINGS = EmmetBuildsettings()
 
 
 class OrbitalBuilder(Builder):
@@ -40,15 +41,15 @@ class OrbitalBuilder(Builder):
         tasks: Store,
         molecules: Store,
         orbitals: Store,
-        query: Optional[Dict] = None,
-        settings: Optional[EmmetBuildSettings] = None,
+        query: Optional[dict] = None,
+        settings: Optional[EmmetBuildsettings] = None,
         **kwargs,
     ):
         self.tasks = tasks
         self.molecules = molecules
         self.orbitals = orbitals
         self.query = query if query else dict()
-        self.settings = EmmetBuildSettings.autoload(settings)
+        self.settings = EmmetBuildsettings.autoload(settings)
         self.kwargs = kwargs
 
         super().__init__(sources=[tasks, molecules], targets=[orbitals], **kwargs)
@@ -85,7 +86,7 @@ class OrbitalBuilder(Builder):
         self.orbitals.ensure_index("last_updated")
         self.orbitals.ensure_index("formula_alphabetical")
 
-    def prechunk(self, number_splits: int) -> Iterable[Dict]:  # pragma: no cover
+    def prechunk(self, number_splits: int) -> Iterable[dict]:  # pragma: no cover
         """Prechunk the builder for distributed computation"""
 
         temp_query = dict(self.query)
@@ -111,7 +112,7 @@ class OrbitalBuilder(Builder):
         for formula_chunk in grouper(to_process_forms, N):
             yield {"query": {"formula_alphabetical": {"$in": list(formula_chunk)}}}
 
-    def get_items(self) -> Iterator[List[Dict]]:
+    def get_items(self) -> Iterator[list[dict]]:
         """
         Gets all items to process into orbital documents.
         This does no datetime checking; relying on on whether
@@ -122,7 +123,7 @@ class OrbitalBuilder(Builder):
         """
 
         self.logger.info("Orbital builder started")
-        self.logger.info("Setting indexes")
+        self.logger.info("setting indexes")
         self.ensure_indexes()
 
         # Save timestamp to mark buildtime
@@ -150,7 +151,7 @@ class OrbitalBuilder(Builder):
         self.logger.info(f"Found {len(to_process_docs)} unprocessed documents")
         self.logger.info(f"Found {len(to_process_forms)} unprocessed formulas")
 
-        # Set total for builder bars to have a total
+        # set total for builder bars to have a total
         self.total = len(to_process_forms)
 
         for formula in to_process_forms:
@@ -160,12 +161,12 @@ class OrbitalBuilder(Builder):
 
             yield molecules
 
-    def process_item(self, items: List[Dict]) -> List[Dict]:
+    def process_item(self, items: list[dict]) -> list[dict]:
         """
         Process the tasks into a OrbitalDocs
 
         Args:
-            tasks List[Dict] : a list of MoleculeDocs in dict form
+            tasks list[dict] : a list of MoleculeDocs in dict form
 
         Returns:
             [dict] : a list of new orbital docs
@@ -257,7 +258,7 @@ class OrbitalBuilder(Builder):
 
         return jsanitize([doc.model_dump() for doc in orbital_docs], allow_bson=True)
 
-    def update_targets(self, items: List[List[Dict]]):
+    def update_targets(self, items: list[list[dict]]):
         """
         Inserts the new documents into the orbitals collection
 

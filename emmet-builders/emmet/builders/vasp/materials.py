@@ -1,13 +1,14 @@
 from datetime import datetime
 from itertools import chain
 from math import ceil
-from typing import Dict, Iterable, Iterator, List, Optional, Union
+from typing import Optional, Union
+from collections.abc import Iterable, Iterator
 
 from maggma.builders import Builder
 from maggma.stores import Store
 from maggma.utils import grouper
 
-from emmet.builders.settings import EmmetBuildSettings
+from emmet.builders.settings import EmmetBuildsettings
 from emmet.core.utils import group_structures, jsanitize, undeform_structure
 from emmet.core.vasp.calc_types import TaskType
 from emmet.core.vasp.material import MaterialsDoc
@@ -15,7 +16,7 @@ from emmet.core.tasks import TaskDoc
 
 __author__ = "Shyam Dwaraknath <shyamd@lbl.gov>"
 
-SETTINGS = EmmetBuildSettings()
+SETTINGS = EmmetBuildsettings()
 
 
 class MaterialsBuilder(Builder):
@@ -39,8 +40,8 @@ class MaterialsBuilder(Builder):
         tasks: Store,
         materials: Store,
         task_validation: Optional[Store] = None,
-        query: Optional[Dict] = None,
-        settings: Optional[EmmetBuildSettings] = None,
+        query: Optional[dict] = None,
+        settings: Optional[EmmetBuildsettings] = None,
         **kwargs,
     ):
         """
@@ -56,7 +57,7 @@ class MaterialsBuilder(Builder):
         self.materials = materials
         self.task_validation = task_validation
         self.query = query if query else {}
-        self.settings = EmmetBuildSettings.autoload(settings)
+        self.settings = EmmetBuildsettings.autoload(settings)
         self.kwargs = kwargs
 
         sources = [tasks]
@@ -84,7 +85,7 @@ class MaterialsBuilder(Builder):
             self.task_validation.ensure_index("task_id")
             self.task_validation.ensure_index("valid")
 
-    def prechunk(self, number_splits: int) -> Iterable[Dict]:  # pragma: no cover
+    def prechunk(self, number_splits: int) -> Iterable[dict]:  # pragma: no cover
         """Prechunk the materials builder for distributed computation"""
         temp_query = dict(self.query)
         temp_query["state"] = "successful"
@@ -114,7 +115,7 @@ class MaterialsBuilder(Builder):
         for formula_chunk in grouper(to_process_forms, N):
             yield {"query": {"formula_pretty": {"$in": list(formula_chunk)}}}
 
-    def get_items(self) -> Iterator[List[Dict]]:
+    def get_items(self) -> Iterator[list[dict]]:
         """
         Gets all items to process into materials documents.
         This does no datetime checking; relying on whether
@@ -129,7 +130,7 @@ class MaterialsBuilder(Builder):
         self.logger.info("Materials builder started")
         self.logger.info(f"Allowed task types: {task_types}")
 
-        self.logger.info("Setting indexes")
+        self.logger.info("setting indexes")
         self.ensure_indexes()
 
         # Save timestamp to mark buildtime for material documents
@@ -162,7 +163,7 @@ class MaterialsBuilder(Builder):
         self.logger.info(f"Found {len(to_process_tasks)} unprocessed tasks")
         self.logger.info(f"Found {len(to_process_forms)} unprocessed formulas")
 
-        # Set total for builder bars to have a total
+        # set total for builder bars to have a total
         self.total = len(to_process_forms)
 
         if self.task_validation:
@@ -212,7 +213,7 @@ class MaterialsBuilder(Builder):
 
             yield tasks
 
-    def process_item(self, items: List[Dict]) -> List[Dict]:
+    def process_item(self, items: list[dict]) -> list[dict]:
         """
         Process the tasks into a list of materials
 
@@ -270,7 +271,7 @@ class MaterialsBuilder(Builder):
 
         return jsanitize([mat.model_dump() for mat in materials], allow_bson=True)
 
-    def update_targets(self, items: List[List[Dict]]):
+    def update_targets(self, items: list[list[dict]]):
         """
         Inserts the new task_types into the task_types collection
 
@@ -294,8 +295,8 @@ class MaterialsBuilder(Builder):
             self.logger.info("No items to update")
 
     def filter_and_group_tasks(
-        self, tasks: List[TaskDoc], task_transformations: List[Union[Dict, None]]
-    ) -> Iterator[List[TaskDoc]]:
+        self, tasks: list[TaskDoc], task_transformations: list[Union[dict, None]]
+    ) -> Iterator[list[TaskDoc]]:
         """
         Groups tasks by structure matching
         """

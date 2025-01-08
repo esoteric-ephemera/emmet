@@ -1,11 +1,11 @@
 # mypy: ignore-errors
 
 """
-Settings for defaults in the core definitions of Materials Project Documents
+settings for defaults in the core definitions of Materials Project Documents
 """
 import json
 from pathlib import Path
-from typing import Type, TypeVar, Union, List, Dict
+from typing import Type, TypeVar, Union
 
 import requests
 from monty.json import MontyDecoder
@@ -20,7 +20,7 @@ S = TypeVar("S", bound="EmmetSettings")
 
 class EmmetSettings(BaseSettings):
     """
-    Settings for the emmet- packages
+    settings for the emmet- packages
     Non-core packages should subclass this to get settings specific to their needs
     The default way to modify these is to modify ~/.emmet.json or set the environment variable
     EMMET_CONFIG_FILE to point to the json with emmet settings
@@ -62,7 +62,7 @@ class EmmetSettings(BaseSettings):
         description="Maximum miller allowed for computing strain direction for maximal piezo response",
     )
 
-    QCHEM_FUNCTIONAL_QUALITY_SCORES: Dict[str, int] = Field(
+    QCHEM_FUNCTIONAL_QUALITY_SCORES: dict[str, int] = Field(
         {
             "wB97M-V": 7,
             "wB97X-V": 6,
@@ -78,7 +78,7 @@ class EmmetSettings(BaseSettings):
         description="Dictionary mapping Q-Chem density functionals to a quality score.",
     )
 
-    QCHEM_BASIS_QUALITY_SCORES: Dict[str, int] = Field(
+    QCHEM_BASIS_QUALITY_SCORES: dict[str, int] = Field(
         {
             "6-31g*": 1,
             "def2-SVPD": 2,
@@ -91,12 +91,12 @@ class EmmetSettings(BaseSettings):
         description="Dictionary mapping Q-Chem basis sets to a quality score.",
     )
 
-    QCHEM_SOLVENT_MODEL_QUALITY_SCORES: Dict[str, int] = Field(
+    QCHEM_SOLVENT_MODEL_QUALITY_SCORES: dict[str, int] = Field(
         {"CMIRS": 7, "SMD": 5, "ISOSVP": 4, "PCM": 3, "VACUUM": 1},
         description="Dictionary mapping Q-Chem solvent models to a quality score.",
     )
 
-    QCHEM_TASK_QUALITY_SCORES: Dict[str, int] = Field(
+    QCHEM_TASK_QUALITY_SCORES: dict[str, int] = Field(
         {
             "single_point": 1,
             "geometry optimization": 2,
@@ -105,7 +105,7 @@ class EmmetSettings(BaseSettings):
         description="Dictionary mapping Q-Chem task type to a quality score",
     )
 
-    VASP_STRUCTURE_QUALITY_SCORES: Dict[str, int] = Field(
+    VASP_STRUCTURE_QUALITY_SCORES: dict[str, int] = Field(
         {"r2SCAN": 5, "SCAN": 4, "GGA+U": 3, "GGA": 2, "PBEsol": 1},
         description="Dictionary Mapping VASP calculation run types to rung level for VASP materials builder structure data",  # noqa: E501
     )
@@ -120,35 +120,35 @@ class EmmetSettings(BaseSettings):
         description="Relative tolerance for kspacing to still be a valid task document",
     )
 
-    VASP_MAX_MAGMOM: Dict[str, float] = Field(
+    VASP_MAX_MAGMOM: dict[str, float] = Field(
         {"Cr": 5}, description="Maximum permitted magnetic moments by element type."
     )
 
-    VASP_DEFAULT_INPUT_SETS: Dict[str, ImportString] = Field(
+    VASP_DEFAULT_INPUT_SETS: dict[str, ImportString] = Field(
         {
-            "GGA Structure Optimization": "pymatgen.io.vasp.sets.MPRelaxSet",
-            "GGA+U Structure Optimization": "pymatgen.io.vasp.sets.MPRelaxSet",
-            "r2SCAN Structure Optimization": "pymatgen.io.vasp.sets.MPScanRelaxSet",
-            "SCAN Structure Optimization": "pymatgen.io.vasp.sets.MPScanRelaxSet",
-            "PBEsol Structure Optimization": "pymatgen.io.vasp.sets.MPScanRelaxSet",
-            "GGA Static": "pymatgen.io.vasp.sets.MPStaticSet",
-            "GGA+U Static": "pymatgen.io.vasp.sets.MPStaticSet",
-            "r2SCAN Static": "pymatgen.io.vasp.sets.MPScanStaticSet",
-            "SCAN Static": "pymatgen.io.vasp.sets.MPScanStaticSet",
-            "PBEsol Static": "pymatgen.io.vasp.sets.MPScanStaticSet",
-            "HSE06 Static": "pymatgen.io.vasp.sets.MPScanStaticSet",
-            "GGA NSCF Uniform": "pymatgen.io.vasp.sets.MPNonSCFSet",
-            "GGA+U NSCF Uniform": "pymatgen.io.vasp.sets.MPNonSCFSet",
-            "GGA NSCF Line": "pymatgen.io.vasp.sets.MPNonSCFSet",
-            "GGA+U NSCF Line": "pymatgen.io.vasp.sets.MPNonSCFSet",
-            "GGA NMR Electric Field Gradient": "pymatgen.io.vasp.sets.MPNMRSet",
-            "GGA NMR Nuclear Shielding": "pymatgen.io.vasp.sets.MPNMRSet",
-            "GGA+U NMR Electric Field Gradient": "pymatgen.io.vasp.sets.MPNMRSet",
-            "GGA+U NMR Nuclear Shielding": "pymatgen.io.vasp.sets.MPNMRSet",
-            "GGA Deformation": "pymatgen.io.vasp.sets.MPStaticSet",
-            "GGA+U Deformation": "pymatgen.io.vasp.sets.MPStaticSet",
-            "GGA DFPT Dielectric": "pymatgen.io.vasp.sets.MPStaticSet",
-            "GGA+U DFPT Dielectric": "pymatgen.io.vasp.sets.MPStaticSet",
+            "GGA Structure Optimization": "pymatgen.io.vasp.sets.MPRelaxset",
+            "GGA+U Structure Optimization": "pymatgen.io.vasp.sets.MPRelaxset",
+            "r2SCAN Structure Optimization": "pymatgen.io.vasp.sets.MPScanRelaxset",
+            "SCAN Structure Optimization": "pymatgen.io.vasp.sets.MPScanRelaxset",
+            "PBEsol Structure Optimization": "pymatgen.io.vasp.sets.MPScanRelaxset",
+            "GGA Static": "pymatgen.io.vasp.sets.MPStaticset",
+            "GGA+U Static": "pymatgen.io.vasp.sets.MPStaticset",
+            "r2SCAN Static": "pymatgen.io.vasp.sets.MPScanStaticset",
+            "SCAN Static": "pymatgen.io.vasp.sets.MPScanStaticset",
+            "PBEsol Static": "pymatgen.io.vasp.sets.MPScanStaticset",
+            "HSE06 Static": "pymatgen.io.vasp.sets.MPScanStaticset",
+            "GGA NSCF Uniform": "pymatgen.io.vasp.sets.MPNonSCFset",
+            "GGA+U NSCF Uniform": "pymatgen.io.vasp.sets.MPNonSCFset",
+            "GGA NSCF Line": "pymatgen.io.vasp.sets.MPNonSCFset",
+            "GGA+U NSCF Line": "pymatgen.io.vasp.sets.MPNonSCFset",
+            "GGA NMR Electric Field Gradient": "pymatgen.io.vasp.sets.MPNMRset",
+            "GGA NMR Nuclear Shielding": "pymatgen.io.vasp.sets.MPNMRset",
+            "GGA+U NMR Electric Field Gradient": "pymatgen.io.vasp.sets.MPNMRset",
+            "GGA+U NMR Nuclear Shielding": "pymatgen.io.vasp.sets.MPNMRset",
+            "GGA Deformation": "pymatgen.io.vasp.sets.MPStaticset",
+            "GGA+U Deformation": "pymatgen.io.vasp.sets.MPStaticset",
+            "GGA DFPT Dielectric": "pymatgen.io.vasp.sets.MPStaticset",
+            "GGA+U DFPT Dielectric": "pymatgen.io.vasp.sets.MPStaticset",
         },
         description="Default input sets for task validation",
     )
@@ -157,7 +157,7 @@ class EmmetSettings(BaseSettings):
         True, description="Whether to validate POTCAR stat values."
     )
 
-    VASP_CHECKED_LDAU_FIELDS: List[str] = Field(
+    VASP_CHECKED_LDAU_FIELDS: list[str] = Field(
         ["LDAUU", "LDAUJ", "LDAUL"], description="LDAU fields to validate for tasks"
     )
 

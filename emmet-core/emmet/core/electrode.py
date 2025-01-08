@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from collections import defaultdict
 from datetime import datetime
-from typing import Dict, List, Optional, Union
+from typing import Optional, Union
 
 from pydantic import BaseModel, Field, field_validator
 from pymatgen.analysis.phase_diagram import PhaseDiagram
@@ -124,33 +124,33 @@ class EntriesCompositionSummary(BaseModel):
     Included to enable better searching via the API.
     """
 
-    all_formulas: Optional[List[str]] = Field(
+    all_formulas: Optional[list[str]] = Field(
         None,
         description="Reduced formulas for material entries across all voltage pairs.",
     )
 
-    all_chemsys: Optional[List[str]] = Field(
+    all_chemsys: Optional[list[str]] = Field(
         None,
         description="Chemical systems for material entries across all voltage pairs.",
     )
 
-    all_formula_anonymous: Optional[List[str]] = Field(
+    all_formula_anonymous: Optional[list[str]] = Field(
         None,
         description="Anonymous formulas for material entries across all voltage pairs.",
     )
 
-    all_elements: Optional[List[Union[Element, Species, DummySpecies]]] = Field(
+    all_elements: Optional[list[Union[Element, Species, DummySpecies]]] = Field(
         None,
         description="Elements in material entries across all voltage pairs.",
     )
 
-    all_composition_reduced: Optional[Dict] = Field(
+    all_composition_reduced: Optional[dict] = Field(
         None,
         description="Composition reduced data for entries across all voltage pairs.",
     )
 
     @classmethod
-    def from_compositions(cls, compositions: List[Composition]):
+    def from_compositions(cls, compositions: list[Composition]):
         all_formulas = list({comp.reduced_formula for comp in compositions})
         all_chemsys = list({comp.chemical_system for comp in compositions})
         all_formula_anonymous = list({comp.anonymized_formula for comp in compositions})
@@ -223,7 +223,7 @@ class BaseElectrode(BaseModel):
         None, description="The id for this battery document."
     )
 
-    elements: Optional[List[Element]] = Field(
+    elements: Optional[list[Element]] = Field(
         None,
         description="The atomic species contained in this electrode (not including the working ion).",
     )
@@ -244,7 +244,7 @@ class BaseElectrode(BaseModel):
         description="Anonymized representation of the formula (not including the working ion).",
     )
 
-    warnings: List[str] = Field(
+    warnings: list[str] = Field(
         [], description="Any warnings related to this electrode data."
     )
 
@@ -264,11 +264,11 @@ class InsertionElectrodeDoc(InsertionVoltagePairDoc, BaseElectrode):
         None, description="Host structure (structure without the working ion)."
     )
 
-    adj_pairs: Optional[List[InsertionVoltagePairDoc]] = Field(
+    adj_pairs: Optional[list[InsertionVoltagePairDoc]] = Field(
         None, description="Returns all of the voltage steps material pairs."
     )
 
-    material_ids: Optional[List[MPID]] = Field(
+    material_ids: Optional[list[MPID]] = Field(
         None,
         description="The ids of all structures that matched to the present host lattice, regardless of stability. "
         "The stable entries can be found in the adjacent pairs.",
@@ -286,7 +286,7 @@ class InsertionElectrodeDoc(InsertionVoltagePairDoc, BaseElectrode):
     @classmethod
     def from_entries(
         cls,
-        grouped_entries: List[ComputedStructureEntry],
+        grouped_entries: list[ComputedStructureEntry],
         working_ion_entry: ComputedEntry,
         battery_id: str,
         strip_structures: bool = False,
@@ -444,7 +444,7 @@ class ConversionElectrodeDoc(ConversionVoltagePairDoc, BaseElectrode):
         description="The starting composition for the ConversionElectrode represented as a string/formula.",
     )
 
-    adj_pairs: Optional[List[ConversionVoltagePairDoc]] = Field(
+    adj_pairs: Optional[list[ConversionVoltagePairDoc]] = Field(
         None, description="Returns all of the voltage steps material pairs."
     )
 
@@ -456,7 +456,7 @@ class ConversionElectrodeDoc(ConversionVoltagePairDoc, BaseElectrode):
     def from_composition_and_entries(
         cls,
         composition: Composition,
-        entries: List[ComputedEntry],
+        entries: list[ComputedEntry],
         working_ion_symbol: str,
         battery_id: str,
         thermo_type: str,

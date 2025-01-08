@@ -1,7 +1,7 @@
 # mypy: ignore-errors
 
 """ Core definition of a VASP Task Document """
-from typing import Any, Dict, List, Union, Optional
+from typing import Any,  Union, Optional
 
 from pydantic import BaseModel, Field
 from pymatgen.analysis.structure_analyzer import oxide_type
@@ -33,21 +33,21 @@ class InputSummary(BaseModel):
     structure: Optional[Structure] = Field(
         None, description="The input structure object"
     )
-    parameters: Dict = Field(
+    parameters: dict = Field(
         {},
         description="Input parameters from VASPRUN for the last calculation in the series",
     )
-    pseudo_potentials: Dict = Field(
+    pseudo_potentials: dict = Field(
         {}, description="Summary of the pseudopotentials used in this calculation"
     )
 
-    potcar_spec: List[Dict] = Field(
+    potcar_spec: list[dict] = Field(
         [], description="Potcar specification as a title and hash"
     )
 
     is_hubbard: bool = Field(False, description="Is this a Hubbard +U calculation.")
 
-    hubbards: Dict = Field({}, description="The hubbard parameters used.")
+    hubbards: dict = Field({}, description="The hubbard parameters used.")
 
 
 class OutputSummary(BaseModel):
@@ -67,7 +67,7 @@ class OutputSummary(BaseModel):
     bandgap: Optional[float] = Field(
         None, description="The DFT bandgap for the last calculation"
     )
-    forces: Optional[List[Vector3D]] = Field(
+    forces: Optional[list[Vector3D]] = Field(
         None, description="Forces on atoms from the last calculation"
     )
     stress: Optional[Matrix3D] = Field(
@@ -110,7 +110,7 @@ class TaskDocument(BaseTaskDocument, StructureMetadata):
     """
 
     calc_code: str = "VASP"
-    run_stats: Dict[str, RunStatistics] = Field(
+    run_stats: dict[str, RunStatistics] = Field(
         {},
         description="Summary of runtime statistics for each calculation in this task",
     )
@@ -124,19 +124,19 @@ class TaskDocument(BaseTaskDocument, StructureMetadata):
 
     state: Optional[TaskState] = Field(None, description="State of this calculation")
 
-    orig_inputs: Dict[str, Any] = Field(
+    orig_inputs: dict[str, Any] = Field(
         {}, description="Summary of the original VASP inputs"
     )
 
-    calcs_reversed: List[Dict] = Field(
+    calcs_reversed: list[dict] = Field(
         [], description="The 'raw' calculation docs used to assembled this task"
     )
 
-    tags: Union[List[str], None] = Field(
+    tags: Union[list[str], None] = Field(
         [], description="Metadata tags for this task document"
     )
 
-    warnings: Optional[List[str]] = Field(
+    warnings: Optional[list[str]] = Field(
         None, description="Any warnings related to this property"
     )
 

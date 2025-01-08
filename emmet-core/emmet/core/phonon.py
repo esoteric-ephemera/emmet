@@ -5,7 +5,7 @@ from emmet.core.mpid import MPID
 from pymatgen.phonon.bandstructure import PhononBandStructureSymmLine
 from pymatgen.phonon.dos import PhononDos as PhononDosObject
 
-from typing import List, Tuple, Optional
+from typing import Optional
 from emmet.core.utils import DocEnum
 from pymatgen.core import Structure
 from emmet.core.math import Vector3D, Tensor4R
@@ -195,19 +195,19 @@ class ThermodynamicProperties(BaseModel):
     Definition of the thermodynamic properties extracted from the phonon frequencies.
     """
 
-    temperatures: List[float] = Field(
+    temperatures: list[float] = Field(
         ...,
         description="The list of temperatures at which the thermodynamic properties "
         "are calculated",
     )
 
-    cv: List[float] = Field(
+    cv: list[float] = Field(
         ...,
         description="The values of the constant-volume specific heat.",
         alias="heat_capacity",
     )
 
-    entropy: List[float] = Field(
+    entropy: list[float] = Field(
         ..., description="The values of the vibrational entropy."
     )
 
@@ -218,17 +218,17 @@ class VibrationalEnergy(BaseModel):
     the temperature.
     """
 
-    temperatures: List[float] = Field(
+    temperatures: list[float] = Field(
         ...,
         description="The list of temperatures at which the thermodynamic properties "
         "are calculated",
     )
 
-    internal_energy: List[float] = Field(
+    internal_energy: list[float] = Field(
         ..., description="The values of the phonon contribution to the internal energy."
     )
 
-    helmholtz_free_energy: List[float] = Field(
+    helmholtz_free_energy: list[float] = Field(
         ..., description="The values of the Helmholtz free energy."
     )
 
@@ -256,8 +256,8 @@ class Phonon(StructureMetadata):
         None, description="The maximum breaking of the acoustic sum rule (ASR)."
     )
 
-    warnings: Optional[List[PhononWarnings]] = Field(
-        None, description="List of warnings associated to the phonon calculation."
+    warnings: Optional[list[PhononWarnings]] = Field(
+        None, description="list of warnings associated to the phonon calculation."
     )
 
     dielectric: Optional[DielectricDoc] = Field(
@@ -301,7 +301,7 @@ class AbinitPhonon(Phonon):
 
     abinit_input_vars: Optional[dict] = Field(
         None,
-        description="Dict representation of the inputs used to obtain the phonon"
+        description="dict representation of the inputs used to obtain the phonon"
         "properties and the main general options (e.g. number of "
         "k-points, number of q-points).",
     )
@@ -322,20 +322,20 @@ class SoundVelocity(BaseModel):
         ..., description="The relaxed structure for the phonon calculation."
     )
 
-    directions: List[Vector3D] = Field(
+    directions: list[Vector3D] = Field(
         ...,
         description="Q-points identifying the directions for the calculation"
         "of the speed of sound. In fractional coordinates.",
     )
 
-    labels: List[Optional[str]] = Field(..., description="labels of the directions.")
+    labels: list[Optional[str]] = Field(..., description="labels of the directions.")
 
-    sound_velocities: List[Vector3D] = Field(
+    sound_velocities: list[Vector3D] = Field(
         ...,
         description="Values of the sound velocities in SI units.",
     )
 
-    mode_types: List[Tuple[Optional[str], Optional[str], Optional[str]]] = Field(
+    mode_types: list[tuple[Optional[str], Optional[str], Optional[str]]] = Field(
         ...,
         description="The types of the modes ('transversal', 'longitudinal'). "
         "None if not correctly identified.",
@@ -389,13 +389,13 @@ class ThermalDisplacement(BaseModel):
         description="The number of temperatures for which the displacements are calculated",
     )
 
-    temperatures: List[float] = Field(
+    temperatures: list[float] = Field(
         ...,
         description="The list of temperatures at which the thermodynamic properties "
         "are calculated",
     )
 
-    frequencies: List[float] = Field(
+    frequencies: list[float] = Field(
         ..., description="The list of frequencies for the generalized DOS"
     )
 
@@ -405,7 +405,7 @@ class ThermalDisplacement(BaseModel):
     )
 
     amu: dict = Field(
-        ..., description="Dictionary of the atomic masses in atomic units."
+        ..., description="dictionary of the atomic masses in atomic units."
     )
 
     structure: Structure = Field(

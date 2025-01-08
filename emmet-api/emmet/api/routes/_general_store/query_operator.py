@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import dict
 from fastapi import Query, Body
 from maggma.api.utils import STORE_PARAMS
 from maggma.api.query_operator import QueryOperator
@@ -11,7 +11,7 @@ class GeneralStorePostQuery(QueryOperator):
         self,
         kind: str = Query(..., title="Data type"),
         markdown: str = Query(None, title="Markdown data"),
-        meta: Dict = Body(None, title="Metadata"),
+        meta: dict = Body(None, title="Metadata"),
     ) -> STORE_PARAMS:
         crit = {"kind": kind, "markdown": markdown, "meta": meta}
 

@@ -1,4 +1,4 @@
-from typing import Literal, Optional, List
+from typing import Literal, Optional
 from pydantic import Field
 from emmet.api import __file__ as root_dir
 import os
@@ -24,7 +24,7 @@ class MAPISettings(BaseSettings):
         None, description="Database name suffix. Either blue or green."
     )
 
-    SORT_FIELDS: List[str] = Field(
+    SORT_FIELDS: list[str] = Field(
         [
             "nsites",
             "nelements",
@@ -62,7 +62,7 @@ class MAPISettings(BaseSettings):
             "surface_anisotropy",
             "shape_factor",
         ],
-        description="List of fields that support sorting",
+        description="list of fields that support sorting",
     )
     TIMEOUT: int = Field(
         30,

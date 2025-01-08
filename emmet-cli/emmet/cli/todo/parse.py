@@ -18,7 +18,7 @@
 #                 if t in year_tags:
 #                     year_tag = t
 #         r = source.collection.update(
-#             {"dir_name": doc["dir_name"]}, {"$addToSet": {"tags": year_tag}}
+#             {"dir_name": doc["dir_name"]}, {"$addToset": {"tags": year_tag}}
 #         )
 #         counter[year_tag] += r["nModified"]
 #     if counter:
@@ -111,7 +111,7 @@
 #                                 "retired_task_id": doc["task_id"],
 #                                 "last_updated": datetime.utcnow(),
 #                             },
-#                             "$addToSet": {"tags": t},
+#                             "$addToset": {"tags": t},
 #                         },
 #                     )
 #                 print(

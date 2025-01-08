@@ -2,7 +2,8 @@ from collections import defaultdict
 from datetime import datetime
 from itertools import chain
 from math import ceil
-from typing import Optional, Iterable, Iterator, List, Dict
+from typing import Optional
+from collections.abc import Iterable, Iterator
 
 from maggma.builders import Builder
 from maggma.core import Store
@@ -12,12 +13,12 @@ from emmet.core.qchem.task import TaskDocument
 from emmet.core.qchem.molecule import MoleculeDoc, evaluate_lot
 from emmet.core.molecules.vibration import VibrationDoc
 from emmet.core.utils import jsanitize
-from emmet.builders.settings import EmmetBuildSettings
+from emmet.builders.settings import EmmetBuildsettings
 
 
 __author__ = "Evan Spotte-Smith"
 
-SETTINGS = EmmetBuildSettings()
+SETTINGS = EmmetBuildsettings()
 
 
 class VibrationBuilder(Builder):
@@ -44,15 +45,15 @@ class VibrationBuilder(Builder):
         tasks: Store,
         molecules: Store,
         vibes: Store,
-        query: Optional[Dict] = None,
-        settings: Optional[EmmetBuildSettings] = None,
+        query: Optional[dict] = None,
+        settings: Optional[EmmetBuildsettings] = None,
         **kwargs,
     ):
         self.tasks = tasks
         self.molecules = molecules
         self.vibes = vibes
         self.query = query if query else dict()
-        self.settings = EmmetBuildSettings.autoload(settings)
+        self.settings = EmmetBuildsettings.autoload(settings)
         self.kwargs = kwargs
 
         super().__init__(sources=[tasks, molecules], targets=[vibes], **kwargs)
@@ -89,7 +90,7 @@ class VibrationBuilder(Builder):
         self.vibes.ensure_index("last_updated")
         self.vibes.ensure_index("formula_alphabetical")
 
-    def prechunk(self, number_splits: int) -> Iterable[Dict]:  # pragma: no cover
+    def prechunk(self, number_splits: int) -> Iterable[dict]:  # pragma: no cover
         """Prechunk the builder for distributed computation"""
 
         temp_query = dict(self.query)
@@ -115,7 +116,7 @@ class VibrationBuilder(Builder):
         for formula_chunk in grouper(to_process_forms, N):
             yield {"query": {"formula_alphabetical": {"$in": list(formula_chunk)}}}
 
-    def get_items(self) -> Iterator[List[Dict]]:
+    def get_items(self) -> Iterator[list[dict]]:
         """
         Gets all items to process into vibration documents.
         This does no datetime checking; relying on on whether
@@ -126,7 +127,7 @@ class VibrationBuilder(Builder):
         """
 
         self.logger.info("Vibration builder started")
-        self.logger.info("Setting indexes")
+        self.logger.info("setting indexes")
         self.ensure_indexes()
 
         # Save timestamp to mark buildtime
@@ -154,7 +155,7 @@ class VibrationBuilder(Builder):
         self.logger.info(f"Found {len(to_process_docs)} unprocessed documents")
         self.logger.info(f"Found {len(to_process_forms)} unprocessed formulas")
 
-        # Set total for builder bars to have a total
+        # set total for builder bars to have a total
         self.total = len(to_process_forms)
 
         for formula in to_process_forms:
@@ -164,12 +165,12 @@ class VibrationBuilder(Builder):
 
             yield molecules
 
-    def process_item(self, items: List[Dict]) -> List[Dict]:
+    def process_item(self, items: list[dict]) -> list[dict]:
         """
         Process the tasks into VibrationDocs
 
         Args:
-            items List[Dict] : a list of MoleculeDocs in dict form
+            items list[dict] : a list of MoleculeDocs in dict form
 
         Returns:
             [dict] : a list of new vibration docs
@@ -247,7 +248,7 @@ class VibrationBuilder(Builder):
 
         return jsanitize([doc.model_dump() for doc in vibe_docs], allow_bson=True)
 
-    def update_targets(self, items: List[List[Dict]]):
+    def update_targets(self, items: list[list[dict]]):
         """
         Inserts the new vibration docs into the vibes collection
 

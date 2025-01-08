@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 
 from pydantic import Field
 from pymatgen.core import Structure
@@ -40,12 +40,12 @@ class MagnetismDoc(PropertyDoc):
         description="The number of unique magnetic sites.",
     )
 
-    types_of_magnetic_species: Optional[List[str]] = Field(
+    types_of_magnetic_species: Optional[list[str]] = Field(
         None,
         description="Magnetic specie elements.",
     )
 
-    magmoms: Optional[List[float]] = Field(
+    magmoms: Optional[list[float]] = Field(
         None,
         description="Magnetic moments for each site.",
     )

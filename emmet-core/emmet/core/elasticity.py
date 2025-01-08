@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Optional, tuple, Union
 
 import numpy as np
 from pydantic import BaseModel, Field
@@ -99,23 +99,23 @@ class FittingData(BaseModel):
     """
 
     # data of strained structures
-    deformations: List[Matrix3D] = Field(
+    deformations: list[Matrix3D] = Field(
         description="Deformations corresponding to the strained structures"
     )
-    strains: List[Matrix3D] = Field(
+    strains: list[Matrix3D] = Field(
         description="Lagrangian strain tensors applied to structures"
     )
-    cauchy_stresses: List[Matrix3D] = Field(
+    cauchy_stresses: list[Matrix3D] = Field(
         description="Cauchy stress tensors on strained structures"
     )
-    second_pk_stresses: List[Matrix3D] = Field(
+    second_pk_stresses: list[Matrix3D] = Field(
         description="Second Piola-Kirchhoff stress tensors on structures"
     )
-    deformation_tasks: Optional[List[MPID]] = Field(
+    deformation_tasks: Optional[list[MPID]] = Field(
         None,
         description="Deformation task ids corresponding to the strained structures",
     )
-    deformation_dir_names: Optional[List[str]] = Field(
+    deformation_dir_names: Optional[list[str]] = Field(
         None, description="Paths to the running directories of deformation tasks"
     )
 
@@ -226,10 +226,10 @@ class ElasticityDoc(PropertyDoc):
         cls,
         structure: Structure,
         material_id: MPID,
-        deformations: List[Deformation],
-        stresses: List[Stress],
-        deformation_task_ids: Optional[List[MPID]] = None,
-        deformation_dir_names: Optional[List[str]] = None,
+        deformations: list[Deformation],
+        stresses: list[Stress],
+        deformation_task_ids: Optional[list[MPID]] = None,
+        deformation_dir_names: Optional[list[str]] = None,
         equilibrium_stress: Optional[Stress] = None,
         optimization_task_id: Optional[MPID] = None,
         optimization_dir_name: Optional[str] = None,
@@ -379,15 +379,15 @@ class ElasticityDoc(PropertyDoc):
 
 
 def generate_primary_fitting_data(
-    deforms: List[Deformation],
-    stresses: List[Stress],
-    task_ids: Optional[List[MPID]] = None,
-    dir_names: Optional[List[str]] = None,
-) -> Tuple[
-    List[Strain],
-    List[Stress],
-    Union[List[MPID], None],
-    Union[List[str], None],
+    deforms: list[Deformation],
+    stresses: list[Stress],
+    task_ids: Optional[list[MPID]] = None,
+    dir_names: Optional[list[str]] = None,
+) -> tuple[
+    list[Strain],
+    list[Stress],
+    Union[list[MPID], None],
+    Union[list[str], None],
 ]:
     """
     Get the primary fitting data, i.e. data obtained from a calculation.
@@ -419,10 +419,10 @@ def generate_primary_fitting_data(
 
 def generate_derived_fitting_data(
     structure: Structure,
-    strains: List[Strain],
-    stresses: List[Stress],
+    strains: list[Strain],
+    stresses: list[Stress],
     symprec=SETTINGS.SYMPREC,
-) -> Tuple[List[Deformation], List[Strain], List[Stress], List[Stress]]:
+) -> tuple[list[Deformation], list[Strain], list[Stress], list[Stress]]:
     """
     Get the derived fitting data from symmetry operations on the primary fitting data.
 
@@ -508,12 +508,12 @@ def generate_derived_fitting_data(
 
 
 def symmetrize_stresses(
-    stresses: List[Stress],
-    strains: List[Strain],
+    stresses: list[Stress],
+    strains: list[Strain],
     structure: Structure,
     symprec=SETTINGS.SYMPREC,
     tol: float = 0.002,
-) -> List[Stress]:
+) -> list[Stress]:
     """
     Symmetrize stresses by averaging over all symmetry operations.
 
@@ -533,7 +533,7 @@ def symmetrize_stresses(
     symmops = sga.get_symmetry_operations(cartesian=True)
 
     # for each strain, get the stresses from other strain states related by symmetry
-    symmmetrized_stresses = []  # type: List[Stress]
+    symmmetrized_stresses = []  # type: list[Stress]
     for strain, _stress in zip(strains, stresses):
         mapping = TensorMapping([strain], [[]], tol=tol)
         for strain2, stress2 in zip(strains, stresses):
@@ -547,8 +547,8 @@ def symmetrize_stresses(
 
 
 def fit_elastic_tensor(
-    strains: List[Strain],
-    stresses: List[Stress],
+    strains: list[Strain],
+    stresses: list[Stress],
     eq_stress: Stress | None,
     fitting_method: str = "finite_difference",
     order: int = 2,
@@ -588,7 +588,7 @@ def fit_elastic_tensor(
 
 def get_derived_properties(
     structure: Structure, tensor: ElasticTensor
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Get derived elasticity properties.
 
@@ -649,9 +649,9 @@ def get_derived_properties(
 def sanity_check(
     structure: Structure,
     elastic_doc: ElasticTensorDoc,
-    strains: List[Strain],
-    derived_props: Dict[str, Any],
-) -> Tuple[Status, List[str]]:
+    strains: list[Strain],
+    derived_props: dict[str, Any],
+) -> tuple[Status, list[str]]:
     """
     Post analysis to generate warnings if any.
 

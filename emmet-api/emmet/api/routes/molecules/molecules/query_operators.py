@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from fastapi import Body, HTTPException, Query
 
@@ -32,7 +32,7 @@ class FormulaQuery(QueryOperator):
 A comma delimited string list of alphabetical formulas can also be provided.",
         ),
     ) -> STORE_PARAMS:
-        crit: Dict[str, Any] = {}  # type: ignore
+        crit: dict[str, Any] = {}  # type: ignore
 
         if formula:
             # Do we need to handle wildcards? For now, don't worry about it.
@@ -260,7 +260,7 @@ class FindMoleculeQuery(QueryOperator):
         self._limit = _limit
         self.molecule = molecule
 
-        crit: Dict[str, Any] = dict()
+        crit: dict[str, Any] = dict()
 
         if charge is not None:
             crit.update({"charge": charge})

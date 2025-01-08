@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Type, TypeVar, Union
+from typing import Optional, Type, TypeVar, Union
 from hashlib import blake2b
 from scipy.stats import describe
 
@@ -67,12 +67,12 @@ class MetalBindingData(BaseModel):
         description="The number of atoms neighboring the metal atom or ion of interest",
     )
 
-    coordinating_atoms: Optional[List[str]] = Field(
+    coordinating_atoms: Optional[list[str]] = Field(
         None, description="The elements/species coordinating the metal."
     )
 
     coordinate_bond_lengths: Optional[
-        Dict[str, Dict[str, Union[float, List[float]]]]
+        dict[str, dict[str, Union[float, list[float]]]]
     ] = Field(
         None,
         description="Bond lengths and statistics broken down by the coordinating atoms",
@@ -185,7 +185,7 @@ class MetalBindingDoc(PropertyDoc):
         "both the frequency calculation and (potentially) the single-point energy correction.",
     )
 
-    binding_data: Optional[List[MetalBindingData]] = Field(
+    binding_data: Optional[list[MetalBindingData]] = Field(
         None, description="Binding data for each metal atom or ion in the molecule"
     )
 
@@ -193,14 +193,14 @@ class MetalBindingDoc(PropertyDoc):
     def from_docs(
         cls: Type[T],
         method: str,
-        metal_indices: List[int],
+        metal_indices: list[int],
         base_molecule_doc: MoleculeDoc,
         partial_charges: PartialChargesDoc,
         partial_spins: Optional[PartialSpinsDoc],
         bonding: MoleculeBondingDoc,
         base_thermo: MoleculeThermoDoc,
-        metal_thermo: Dict[int, MoleculeThermoDoc],
-        nometal_thermo: Dict[int, MoleculeThermoDoc],
+        metal_thermo: dict[int, MoleculeThermoDoc],
+        nometal_thermo: dict[int, MoleculeThermoDoc],
         **kwargs,
     ):  # type: ignore[override]
         """
@@ -210,7 +210,7 @@ class MetalBindingDoc(PropertyDoc):
             and MoleculeBondingDocs (to assess the coordination environment of the metal).
 
         :param method: What method was used to construct this document?
-        :param metal_indices: List of indices in the Molecule corresponding to metals
+        :param metal_indices: list of indices in the Molecule corresponding to metals
         :param base_molecule_doc: MoleculeDoc used for basic ID, species, structure information
         :param partial_charges: PartialChargesDoc used to determine the oxidation state of the
             metal of interest
@@ -218,10 +218,10 @@ class MetalBindingDoc(PropertyDoc):
             interest
         :param bonding: MoleculeBondingDoc used to determine the coordination environment
         :param base_thermo: MoleculeThermoDoc for the molecule of interest.
-        :param metal_thermo: Dict[int, MoleculeThermoDoc], where the keys are the indices of the
+        :param metal_thermo: dict[int, MoleculeThermoDoc], where the keys are the indices of the
             metal ions or atoms in this molecule and the values are the MoleculeThermoDocs corresponding
             to the appropriate metal (with the correct charge and spin)
-        :param nometal_thermo: Dict[int, MoleculeThermoDoc], where the keys are the indices of the
+        :param nometal_thermo: dict[int, MoleculeThermoDoc], where the keys are the indices of the
             metal ions or atoms in this molecule and the values are the MoleculeThermoDocs corresponding
             to the appropriate metal (with the correct charge and spin)
 

@@ -3,7 +3,8 @@ import copy
 from datetime import datetime
 from itertools import chain, groupby
 from math import ceil
-from typing import Any, Dict, Iterable, Iterator, List, Optional, Union
+from typing import Any,  Optional, Union
+from collections.abc import Iterable, Iterator
 
 from maggma.builders import Builder
 from maggma.core import Store
@@ -15,12 +16,12 @@ from emmet.core.molecules.bonds import metals
 from emmet.core.molecules.thermo import MoleculeThermoDoc
 from emmet.core.molecules.redox import RedoxDoc
 from emmet.core.utils import confirm_molecule, get_graph_hash, jsanitize
-from emmet.builders.settings import EmmetBuildSettings
+from emmet.builders.settings import EmmetBuildsettings
 
 
 __author__ = "Evan Spotte-Smith"
 
-SETTINGS = EmmetBuildSettings()
+SETTINGS = EmmetBuildsettings()
 
 
 class RedoxBuilder(Builder):
@@ -51,8 +52,8 @@ class RedoxBuilder(Builder):
         molecules: Store,
         thermo: Store,
         redox: Store,
-        query: Optional[Dict] = None,
-        settings: Optional[EmmetBuildSettings] = None,
+        query: Optional[dict] = None,
+        settings: Optional[EmmetBuildsettings] = None,
         **kwargs,
     ):
         self.tasks = tasks
@@ -60,7 +61,7 @@ class RedoxBuilder(Builder):
         self.thermo = thermo
         self.redox = redox
         self.query = query if query else dict()
-        self.settings = EmmetBuildSettings.autoload(settings)
+        self.settings = EmmetBuildsettings.autoload(settings)
         self.kwargs = kwargs
 
         super().__init__(sources=[tasks, molecules, thermo], targets=[redox], **kwargs)
@@ -105,7 +106,7 @@ class RedoxBuilder(Builder):
         self.redox.ensure_index("last_updated")
         self.redox.ensure_index("formula_alphabetical")
 
-    def prechunk(self, number_splits: int) -> Iterable[Dict]:  # pragma: no cover
+    def prechunk(self, number_splits: int) -> Iterable[dict]:  # pragma: no cover
         """Prechunk the builder for distributed computation"""
 
         temp_query = dict(self.query)
@@ -131,7 +132,7 @@ class RedoxBuilder(Builder):
         for formula_chunk in grouper(to_process_forms, N):
             yield {"query": {"formula_alphabetical": {"$in": list(formula_chunk)}}}
 
-    def get_items(self) -> Iterator[List[Dict]]:
+    def get_items(self) -> Iterator[list[dict]]:
         """
         Gets all items to process into redox documents.
         This does no datetime checking; relying on on whether
@@ -142,7 +143,7 @@ class RedoxBuilder(Builder):
         """
 
         self.logger.info("Redox builder started")
-        self.logger.info("Setting indexes")
+        self.logger.info("setting indexes")
         self.ensure_indexes()
 
         # Save timestamp to mark buildtime
@@ -170,7 +171,7 @@ class RedoxBuilder(Builder):
         self.logger.info(f"Found {len(to_process_docs)} unprocessed documents")
         self.logger.info(f"Found {len(to_process_forms)} unprocessed formulas")
 
-        # Set total for builder bars to have a total
+        # set total for builder bars to have a total
         self.total = len(to_process_forms)
 
         for formula in to_process_forms:
@@ -180,12 +181,12 @@ class RedoxBuilder(Builder):
 
             yield molecules
 
-    def process_item(self, items: List[Dict]) -> List[Dict]:
+    def process_item(self, items: list[dict]) -> list[dict]:
         """
         Process the tasks into a RedoxDoc
 
         Args:
-            tasks List[Dict] : a list of MoleculeDocs in dict form
+            tasks list[dict] : a list of MoleculeDocs in dict form
 
         Returns:
             [dict] : a list of new redox docs
@@ -203,7 +204,7 @@ class RedoxBuilder(Builder):
 
         for graph_group in group_by_graph.values():
             # Molecule docs will be grouped by charge
-            charges: Dict[int, Any] = dict()
+            charges: dict[int, Any] = dict()
 
             for gg in graph_group:
                 # First, grab relevant MoleculeThermoDocs and identify possible IE/EA single-points
@@ -360,7 +361,7 @@ class RedoxBuilder(Builder):
             [doc.model_dump() for doc in redox_docs if doc is not None], allow_bson=True
         )
 
-    def update_targets(self, items: List[List[Dict]]):
+    def update_targets(self, items: list[list[dict]]):
         """
         Inserts the new documents into the orbitals collection
 
@@ -391,15 +392,15 @@ class RedoxBuilder(Builder):
             self.logger.info("No items to update")
 
     @staticmethod
-    def _group_by_graph(mol_docs: List[MoleculeDoc]) -> Dict[int, List[MoleculeDoc]]:
+    def _group_by_graph(mol_docs: list[MoleculeDoc]) -> dict[int, list[MoleculeDoc]]:
         """
         Group molecule docs by molecular graph connectivity
 
-        :param entries: List of entries (dicts derived from TaskDocuments)
+        :param entries: list of entries (dicts derived from TaskDocuments)
         :return: Grouped molecule entries
         """
 
-        graph_hashes_nometal: List[str] = list()
+        graph_hashes_nometal: list[str] = list()
         results = defaultdict(list)
 
         # Within each group, group by the covalent molecular graph
@@ -430,19 +431,19 @@ class RedoxBuilder(Builder):
 
     @staticmethod
     def _collect_by_lot_solvent(
-        thermo_docs: List[MoleculeThermoDoc],
-        ie_docs: List[TaskDocument],
-        ea_docs: List[TaskDocument],
-    ) -> Dict[str, Any]:
+        thermo_docs: list[MoleculeThermoDoc],
+        ie_docs: list[TaskDocument],
+        ea_docs: list[TaskDocument],
+    ) -> dict[str, Any]:
         """
         For a given MoleculeDoc, group potential MoleculeThermoDocs and TaskDocs for
         IE/EA calculations based on level of theory and solvent.
 
         Args:
-            thermo_docs (list of MoleculeThermoDocs): List of MoleculeThermoDocs for this MoleculeDoc
-            ie_docs (list of TaskDocuments): List of TaskDocs which could be used
+            thermo_docs (list of MoleculeThermoDocs): list of MoleculeThermoDocs for this MoleculeDoc
+            ie_docs (list of TaskDocuments): list of TaskDocs which could be used
                 to calculate vertical ionization energies for this MoleculeDoc
-            ea_docs (list of TaskDocuments): List of TaskDocs which could be used
+            ea_docs (list of TaskDocuments): list of TaskDocs which could be used
                 to calculate vertical electron affinities for this MoleculeDoc:
 
         Returns:

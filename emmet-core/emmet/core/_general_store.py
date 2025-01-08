@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Dict
+from typing import dict
 
 try:
     from typing import Literal, Optional  # type: ignore
@@ -19,7 +19,7 @@ class GeneralStoreDoc(BaseModel):
 
     markdown: Optional[str] = Field(None, description="Markdown data.")
 
-    meta: Optional[Dict] = Field(None, description="Metadata.")
+    meta: Optional[dict] = Field(None, description="Metadata.")
 
     last_updated: datetime = Field(
         description="Timestamp for when this document was last updated",

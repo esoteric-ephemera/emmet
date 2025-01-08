@@ -5,12 +5,12 @@ import re
 from collections import OrderedDict
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Type, TypeVar, Union
+from typing import Any, Optional, Type, TypeVar, Union
 
 import numpy as np
 from monty.json import MontyDecoder
 from monty.serialization import loadfn
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import BaseModel, Configdict, Field, field_validator, model_validator
 from pymatgen.analysis.structure_analyzer import oxide_type
 from pymatgen.core.structure import Structure
 from pymatgen.core.trajectory import Trajectory
@@ -51,8 +51,8 @@ class Potcar(BaseModel):
     functional: Optional[str] = Field(
         None, description="Functional type use in the calculation."
     )
-    symbols: Optional[List[str]] = Field(
-        None, description="List of VASP potcar symbols used in the calculation."
+    symbols: Optional[list[str]] = Field(
+        None, description="list of VASP potcar symbols used in the calculation."
     )
 
 
@@ -62,7 +62,7 @@ class OrigInputs(CalculationInput):
         description="Pymatgen object representing the POSCAR file.",
     )
 
-    potcar: Optional[Union[Potcar, VaspPotcar, List[Any]]] = Field(
+    potcar: Optional[Union[Potcar, VaspPotcar, list[Any]]] = Field(
         None,
         description="Pymatgen object representing the POTCAR file.",
     )
@@ -86,7 +86,7 @@ class OrigInputs(CalculationInput):
             return Potcar(pot_type=pot_typ, functional=v.functional, symbols=v.symbols)
         return v
 
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    model_config = Configdict(arbitrary_types_allowed=True)
 
 
 class OutputDoc(BaseModel):
@@ -98,10 +98,10 @@ class OutputDoc(BaseModel):
 
     density: Optional[float] = Field(None, description="Density of in units of g/cc.")
     energy: Optional[float] = Field(None, description="Total Energy in units of eV.")
-    forces: Optional[List[List[float]]] = Field(
+    forces: Optional[list[list[float]]] = Field(
         None, description="The force on each atom in units of eV/A^2."
     )
-    stress: Optional[List[List[float]]] = Field(
+    stress: Optional[list[list[float]]] = Field(
         None, description="The stress on the cell in units of kB."
     )
     energy_per_atom: Optional[float] = Field(
@@ -187,13 +187,13 @@ class InputDoc(CalculationInput):
     is_lasph: Optional[bool] = Field(
         None, description="Whether the calculation was run with aspherical corrections"
     )
-    magnetic_moments: Optional[List[float]] = Field(
+    magnetic_moments: Optional[list[float]] = Field(
         None, description="Magnetic moments for each atom"
     )
 
     @field_validator("parameters", mode="after")
     @classmethod
-    def parameter_keys_should_not_contain_spaces(cls, parameters: Optional[Dict]):
+    def parameter_keys_should_not_contain_spaces(cls, parameters: Optional[dict]):
         # A change in VASP introduced whitespace into some parameters,
         # for example `<i type="string" name="GGA    ">PE</I>` was observed in
         # VASP 6.4.3. This will lead to an incorrect return value from RunType.
@@ -233,10 +233,10 @@ class InputDoc(CalculationInput):
 
 
 class CustodianDoc(BaseModel):
-    corrections: Optional[List[Any]] = Field(
+    corrections: Optional[list[Any]] = Field(
         None,
         title="Custodian Corrections",
-        description="List of custodian correction data for calculation.",
+        description="list of custodian correction data for calculation.",
     )
     job: Optional[Any] = Field(
         None,
@@ -262,13 +262,13 @@ class AnalysisDoc(BaseModel):
         description="Maximum force on any atom at the end of the calculation.",
     )
 
-    warnings: Optional[List[str]] = Field(
+    warnings: Optional[list[str]] = Field(
         None,
         title="Calculation Warnings",
         description="Warnings issued after analysis.",
     )
 
-    errors: Optional[List[str]] = Field(
+    errors: Optional[list[str]] = Field(
         None,
         title="Calculation Errors",
         description="Errors issued after analysis.",
@@ -277,7 +277,7 @@ class AnalysisDoc(BaseModel):
     @classmethod
     def from_vasp_calc_docs(
         cls,
-        calcs_reversed: List[Calculation],
+        calcs_reversed: list[Calculation],
         volume_change_warning_tol: float = 0.2,
     ) -> "AnalysisDoc":
         """
@@ -330,7 +330,7 @@ class AnalysisDoc(BaseModel):
 class TaskDoc(StructureMetadata, extra="allow"):
     """Calculation-level details about VASP calculations that power Materials Project."""
 
-    tags: Union[List[str], None] = Field(
+    tags: Union[list[str], None] = Field(
         [], title="tag", description="Metadata tagged to a given task."
     )
     dir_name: Optional[str] = Field(
@@ -339,7 +339,7 @@ class TaskDoc(StructureMetadata, extra="allow"):
 
     state: Optional[TaskState] = Field(None, description="State of this calculation")
 
-    calcs_reversed: Optional[List[Calculation]] = Field(
+    calcs_reversed: Optional[list[Calculation]] = Field(
         None,
         title="Calcs reversed data",
         description="Detailed data for each VASP calculation contributing to the task document.",
@@ -382,10 +382,10 @@ class TaskDoc(StructureMetadata, extra="allow"):
         description="The exact set of output parameters used to generate the current task document.",
     )
 
-    included_objects: Optional[List[VaspObject]] = Field(
-        None, description="List of VASP objects included with this task document"
+    included_objects: Optional[list[VaspObject]] = Field(
+        None, description="list of VASP objects included with this task document"
     )
-    vasp_objects: Optional[Dict[VaspObject, Any]] = Field(
+    vasp_objects: Optional[dict[VaspObject, Any]] = Field(
         None, description="Vasp objects associated with this task"
     )
     entry: Optional[ComputedEntry] = Field(
@@ -404,11 +404,11 @@ class TaskDoc(StructureMetadata, extra="allow"):
         description="Information on the structural transformations, parsed from a "
         "transformations.json file",
     )
-    additional_json: Optional[Dict[str, Any]] = Field(
+    additional_json: Optional[dict[str, Any]] = Field(
         None, description="Additional json loaded from the calculation directory"
     )
 
-    custodian: Optional[List[CustodianDoc]] = Field(
+    custodian: Optional[list[CustodianDoc]] = Field(
         None,
         title="Calcs reversed data",
         description="Detailed custodian data for each VASP calculation contributing to the task document.",
@@ -513,9 +513,9 @@ class TaskDoc(StructureMetadata, extra="allow"):
     def from_directory(
         cls: Type[_T],
         dir_name: Union[Path, str],
-        volumetric_files: Tuple[str, ...] = _VOLUMETRIC_FILES,
+        volumetric_files: tuple[str, ...] = _VOLUMETRIC_FILES,
         store_additional_json: bool = True,
-        additional_fields: Optional[Dict[str, Any]] = None,
+        additional_fields: Optional[dict[str, Any]] = None,
         volume_change_warning_tol: float = 0.2,
         task_names: Optional[list[str]] = None,
         **vasp_calculation_kwargs,
@@ -532,7 +532,7 @@ class TaskDoc(StructureMetadata, extra="allow"):
         volumetric_files
             Volumetric files to search for.
         additional_fields
-            Dictionary of additional fields to add to output document.
+            dictionary of additional fields to add to output document.
         volume_change_warning_tol
             Maximum volume change allowed in VASP relaxations before the calculation is
             tagged with a warning.
@@ -625,7 +625,7 @@ class TaskDoc(StructureMetadata, extra="allow"):
     def from_vasprun(
         cls: Type[_T],
         path: Union[str, Path],
-        additional_fields: Optional[Dict[str, Any]] = None,
+        additional_fields: Optional[dict[str, Any]] = None,
         volume_change_warning_tol: float = 0.2,
         **vasp_calculation_kwargs,
     ) -> _T:
@@ -641,7 +641,7 @@ class TaskDoc(StructureMetadata, extra="allow"):
         ----------
         path
             The path to the vasprun.xml.
-        additional_fields: Dict[str, Any] = None,
+        additional_fields: dict[str, Any] = None,
         volume_change_warning_tol
             Maximum volume change allowed in VASP relaxations before the calculation is
             tagged with a warning.
@@ -697,7 +697,7 @@ class TaskDoc(StructureMetadata, extra="allow"):
 
     @staticmethod
     def get_entry(
-        calcs_reversed: List[Calculation], task_id: Optional[Union[MPID, str]] = None
+        calcs_reversed: list[Calculation], task_id: Optional[Union[MPID, str]] = None
     ) -> ComputedEntry:
         """
         Get a computed entry from a list of VASP calculation documents.
@@ -804,7 +804,7 @@ class TrajectoryDoc(BaseModel):
         "This comes in the form: mp-******.",
     )
 
-    trajectories: Optional[List[Trajectory]] = Field(
+    trajectories: Optional[list[Trajectory]] = Field(
         None,
         description="Trajectory data for calculations associated with a task doc.",
     )
@@ -874,7 +874,7 @@ def get_uri(dir_name: Union[str, Path]) -> str:
 
 def _parse_transformations(
     dir_name: Path,
-) -> Tuple[Dict, Optional[int], Optional[List[str]], Optional[str]]:
+) -> tuple[dict, Optional[int], Optional[list[str]], Optional[str]]:
     """Parse transformations.json file."""
     transformations = {}
     filenames = tuple(dir_name.glob("transformations.json*"))
@@ -902,7 +902,7 @@ def _parse_transformations(
     return transformations, icsd_id, new_tags, new_author
 
 
-def _parse_custodian(dir_name: Path) -> Optional[Dict]:
+def _parse_custodian(dir_name: Path) -> Optional[dict]:
     """
     Parse custodian.json file.
 
@@ -927,7 +927,7 @@ def _parse_custodian(dir_name: Path) -> Optional[Dict]:
 
 def _parse_orig_inputs(
     dir_name: Path,
-) -> Dict[str, Union[Kpoints, Poscar, PotcarSpec, Incar]]:
+) -> dict[str, Union[Kpoints, Poscar, PotcarSpec, Incar]]:
     """
     Parse original input files.
 
@@ -941,7 +941,7 @@ def _parse_orig_inputs(
 
     Returns
     -------
-    Dict[str, Union[Kpints, Poscar, PotcarSpec, Incar]]
+    dict[str, Union[Kpints, Poscar, PotcarSpec, Incar]]
         The original POSCAR, KPOINTS, POTCAR, and INCAR data.
     """
     orig_inputs = {}
@@ -965,7 +965,7 @@ def _parse_orig_inputs(
     return orig_inputs
 
 
-def _parse_additional_json(dir_name: Path) -> Dict[str, Any]:
+def _parse_additional_json(dir_name: Path) -> dict[str, Any]:
     """Parse additional json files in the directory."""
     additional_json = {}
     for filename in dir_name.glob("*.json*"):
@@ -982,7 +982,7 @@ def _parse_additional_json(dir_name: Path) -> Dict[str, Any]:
 def _get_max_force(calc_doc: Calculation) -> Optional[float]:
     """Get max force acting on atoms from a calculation document."""
     if calc_doc.output.ionic_steps:
-        forces: Optional[Union[np.ndarray, List]] = calc_doc.output.ionic_steps[
+        forces: Optional[Union[np.ndarray, list]] = calc_doc.output.ionic_steps[
             -1
         ].forces
         structure = calc_doc.output.structure
@@ -995,7 +995,7 @@ def _get_max_force(calc_doc: Calculation) -> Optional[float]:
     return None
 
 
-def _get_drift_warnings(calc_doc: Calculation) -> List[str]:
+def _get_drift_warnings(calc_doc: Calculation) -> list[str]:
     """Get warnings of whether the drift on atoms is too large."""
     warnings = []
     if calc_doc.input.parameters.get("NSW", 0) > 0:
@@ -1011,7 +1011,7 @@ def _get_drift_warnings(calc_doc: Calculation) -> List[str]:
     return warnings
 
 
-def _get_state(calcs_reversed: List[Calculation], analysis: AnalysisDoc) -> TaskState:
+def _get_state(calcs_reversed: list[Calculation], analysis: AnalysisDoc) -> TaskState:
     """Get state from calculation documents and relaxation analysis."""
     all_calcs_completed = all(
         c.has_vasp_completed == TaskState.SUCCESS for c in calcs_reversed
@@ -1021,7 +1021,7 @@ def _get_state(calcs_reversed: List[Calculation], analysis: AnalysisDoc) -> Task
     return TaskState.FAILED  # type: ignore
 
 
-def _get_run_stats(calcs_reversed: List[Calculation]) -> Dict[str, RunStatistics]:
+def _get_run_stats(calcs_reversed: list[Calculation]) -> dict[str, RunStatistics]:
     """Get summary of runtime statistics for each calculation in this task."""
     run_stats = {}
     total = dict(
@@ -1049,9 +1049,9 @@ def _get_run_stats(calcs_reversed: List[Calculation]) -> Dict[str, RunStatistics
 
 def _find_vasp_files(
     path: Union[str, Path],
-    volumetric_files: Tuple[str, ...] = _VOLUMETRIC_FILES,
+    volumetric_files: tuple[str, ...] = _VOLUMETRIC_FILES,
     task_names: Optional[list[str]] = None,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Find VASP files in a directory.
 

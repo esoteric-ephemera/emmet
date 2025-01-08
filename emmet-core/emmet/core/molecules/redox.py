@@ -1,5 +1,5 @@
 from hashlib import blake2b
-from typing import Any, Dict, Optional, Type, TypeVar
+from typing import Any, Optional, Type, TypeVar
 
 from pydantic import Field
 
@@ -95,7 +95,7 @@ class RedoxDoc(PropertyDoc):
     )
 
     @classmethod
-    def _g_or_e(cls: Type[T], entry: Dict[str, Any]) -> float:
+    def _g_or_e(cls: Type[T], entry: dict[str, Any]) -> float:
         """
         Single atoms may not have free energies like more complex molecules do.
         This function returns the free energy of a TaskDocument entry if

@@ -1,9 +1,9 @@
-from typing import Dict, Optional
+from typing import Optional
 
 from maggma.builders import MapBuilder
 from maggma.core import Store
 
-from emmet.builders.settings import EmmetBuildSettings
+from emmet.builders.settings import EmmetBuildsettings
 from emmet.builders.utils import get_potcar_stats
 from emmet.core.tasks import TaskDoc
 from emmet.core.vasp.calc_types.enums import CalcType
@@ -15,9 +15,9 @@ class TaskValidator(MapBuilder):
         self,
         tasks: Store,
         task_validation: Store,
-        potcar_stats: Optional[Dict[CalcType, Dict[str, str]]] = None,
-        settings: Optional[EmmetBuildSettings] = None,
-        query: Optional[Dict] = None,
+        potcar_stats: Optional[dict[CalcType, dict[str, str]]] = None,
+        settings: Optional[EmmetBuildsettings] = None,
+        query: Optional[dict] = None,
         **kwargs,
     ):
         """
@@ -31,12 +31,12 @@ class TaskValidator(MapBuilder):
         """
         self.tasks = tasks
         self.task_validation = task_validation
-        self.settings = EmmetBuildSettings.autoload(settings)
+        self.settings = EmmetBuildsettings.autoload(settings)
         self.query = query
         self.kwargs = kwargs
         self.potcar_stats = potcar_stats
 
-        # Set up potcar cache if appropriate
+        # set up potcar cache if appropriate
         if self.settings.VASP_VALIDATE_POTCAR_STATS:
             if not self.potcar_stats:
                 self.potcar_stats = get_potcar_stats(method="stored")

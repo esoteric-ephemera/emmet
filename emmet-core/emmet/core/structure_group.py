@@ -2,7 +2,7 @@ import logging
 import operator
 from datetime import datetime
 from itertools import groupby
-from typing import Iterable, List, Optional, Union
+from typing import Iterable, Optional, Union
 
 from pydantic import field_validator, BaseModel, Field
 from pymatgen.analysis.structure_matcher import ElementComparator, StructureMatcher
@@ -15,7 +15,7 @@ from emmet.core.common import convert_datetime
 logger = logging.getLogger(__name__)
 
 
-def generic_groupby(list_in, comp=operator.eq) -> List[int]:
+def generic_groupby(list_in, comp=operator.eq) -> list[int]:
     """
     Group a list of unsortable objects
     Args:
@@ -24,7 +24,7 @@ def generic_groupby(list_in, comp=operator.eq) -> List[int]:
     Returns:
         [int] list of labels for the input list
     """
-    list_out = [None] * len(list_in)  # type: List[Union[int, None]]
+    list_out = [None] * len(list_in)  # type: list[Union[int, None]]
     label_num = 0
     for i1, ls1 in enumerate(list_out):
         if ls1 is not None:
@@ -105,7 +105,7 @@ class StructureGroupDoc(BaseModel):
     @classmethod
     def from_grouped_entries(
         cls,
-        entries: List[Union[ComputedEntry, ComputedStructureEntry]],
+        entries: list[Union[ComputedEntry, ComputedStructureEntry]],
         ignored_specie: str,
     ) -> "StructureGroupDoc":
         """ "
@@ -149,12 +149,12 @@ class StructureGroupDoc(BaseModel):
     @classmethod
     def from_ungrouped_structure_entries(
         cls,
-        entries: List[Union[ComputedEntry, ComputedStructureEntry]],
+        entries: list[Union[ComputedEntry, ComputedStructureEntry]],
         ignored_specie: str,
         ltol: float = 0.2,
         stol: float = 0.3,
         angle_tol: float = 5.0,
-    ) -> List["StructureGroupDoc"]:
+    ) -> list["StructureGroupDoc"]:
         """
         Create a list of StructureGroupDocs from a list of ungrouped entries.
 
@@ -215,7 +215,7 @@ class StructureGroupDoc(BaseModel):
 
     @staticmethod
     def get_host_and_insertion_ids(
-        entries: List[Union[ComputedEntry, ComputedStructureEntry]],
+        entries: list[Union[ComputedEntry, ComputedStructureEntry]],
         ignored_specie: str,
     ) -> dict:
         host_and_insertion_ids = {
@@ -248,7 +248,7 @@ def group_entries_with_structure_matcher(
     g,
     struct_matcher: StructureMatcher,
     working_ion: Optional[str] = None,
-) -> Iterable[List[Union[ComputedStructureEntry, ComputedEntry]]]:
+) -> Iterable[list[Union[ComputedStructureEntry, ComputedEntry]]]:
     """
     Group the entries together based on similarity of the  primitive cells
     Args:

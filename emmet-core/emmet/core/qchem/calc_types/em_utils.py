@@ -36,7 +36,7 @@ def level_of_theory(parameters: CalculationInput) -> LevelOfTheory:
     based on the input parameters given to Q-Chem
 
     Args:
-        parameters: Dict of Q-Chem input parameters
+        parameters: dict of Q-Chem input parameters
 
     """
 
@@ -100,7 +100,7 @@ def solvent(parameters: CalculationInput, custom_smd: Optional[str] = None) -> s
     Returns the solvent used for this calculation.
 
     Args:
-        parameters: Dict of Q-Chem input parameters
+        parameters: dict of Q-Chem input parameters
         custom_smd: (Optional) string representing SMD parameters for a
         non-standard solvent
     """
@@ -164,7 +164,7 @@ def lot_solvent_string(
     Returns a string representation of the level of theory and solvent used for this calculation.
 
     Args:
-        parameters: Dict of Q-Chem input parameters
+        parameters: dict of Q-Chem input parameters
         custom_smd: (Optional) string representing SMD parameters for a
         non-standard solvent
     """
@@ -204,7 +204,7 @@ def calc_type(
 
     Args:
         inputs: inputs dict with an incar, kpoints, potcar, and poscar dictionaries
-        parameters: Dictionary of VASP parameters from Vasprun.xml
+        parameters: dictionary of VASP parameters from Vasprun.xml
     """
     rt = level_of_theory(parameters).value
     tt = task_type(parameters, special_run_type=special_run_type).value

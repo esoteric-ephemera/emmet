@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 from pydantic import BaseModel, Field
 from pymatgen.core.periodic_table import Element
 from pymatgen.core.structure import Molecule
@@ -9,9 +9,9 @@ class MoleculesDoc(BaseModel):
     Molecules relevant to battery electrolytes.
     """
 
-    elements: Optional[List[Element]] = Field(
+    elements: Optional[list[Element]] = Field(
         None,
-        description="List of elements in the molecule.",
+        description="list of elements in the molecule.",
     )
 
     nelements: Optional[int] = Field(

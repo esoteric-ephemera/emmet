@@ -1,11 +1,11 @@
 from datetime import datetime
-from typing import Dict, List, Union, Optional
+from typing import Union, Optional
 
 import numpy as np
-from pydantic import ConfigDict, Field, ImportString
+from pydantic import Configdict, Field, ImportString
 from pymatgen.core.structure import Structure
 from pymatgen.io.vasp.inputs import Kpoints
-from pymatgen.io.vasp.sets import VaspInputSet
+from pymatgen.io.vasp.sets import VaspInputset
 
 from emmet.core.settings import EmmetSettings
 from emmet.core.base import EmmetBaseModel
@@ -51,17 +51,17 @@ class ValidationDoc(EmmetBaseModel):
         description="Last updated date for this document",
         default_factory=datetime.utcnow,
     )
-    reasons: Optional[List[Union[DeprecationMessage, str]]] = Field(
-        None, description="List of deprecation tags detailing why this task isn't valid"
+    reasons: Optional[list[Union[DeprecationMessage, str]]] = Field(
+        None, description="list of deprecation tags detailing why this task isn't valid"
     )
-    warnings: List[str] = Field(
-        [], description="List of potential warnings about this calculation"
+    warnings: list[str] = Field(
+        [], description="list of potential warnings about this calculation"
     )
-    data: Dict = Field(
-        description="Dictioary of data used to perform validation."
+    data: dict = Field(
+        description="dictioary of data used to perform validation."
         " Useful for post-mortem analysis"
     )
-    model_config = ConfigDict(extra="allow")
+    model_config = Configdict(extra="allow")
     nelements: Optional[int] = Field(None, description="Number of elements.")
     symmetry_number: Optional[int] = Field(
         None,
@@ -75,11 +75,11 @@ class ValidationDoc(EmmetBaseModel):
         task_doc: Union[TaskDoc, TaskDocument],
         kpts_tolerance: float = SETTINGS.VASP_KPTS_TOLERANCE,
         kspacing_tolerance: float = SETTINGS.VASP_KSPACING_TOLERANCE,
-        input_sets: Dict[str, ImportString] = SETTINGS.VASP_DEFAULT_INPUT_SETS,
-        LDAU_fields: List[str] = SETTINGS.VASP_CHECKED_LDAU_FIELDS,
+        input_sets: dict[str, ImportString] = SETTINGS.VASP_DEFAULT_INPUT_SETS,
+        LDAU_fields: list[str] = SETTINGS.VASP_CHECKED_LDAU_FIELDS,
         max_allowed_scf_gradient: float = SETTINGS.VASP_MAX_SCF_GRADIENT,
-        max_magmoms: Dict[str, float] = SETTINGS.VASP_MAX_MAGMOM,
-        potcar_stats: Optional[Dict[CalcType, Dict[str, str]]] = None,
+        max_magmoms: dict[str, float] = SETTINGS.VASP_MAX_MAGMOM,
+        potcar_stats: Optional[dict[CalcType, dict[str, str]]] = None,
     ) -> "ValidationDoc":
         """
         Determines if a calculation is valid based on expected input parameters from a pymatgen inputset
@@ -93,7 +93,7 @@ class ValidationDoc(EmmetBaseModel):
             LDAU_fields: LDAU fields to check for consistency
             max_allowed_scf_gradient: maximum uphill gradient allowed for SCF steps after the
                 initial equillibriation period
-            potcar_stats: Dictionary of potcar stat data. Mapping is calculation type -> potcar symbol -> hash value.
+            potcar_stats: dictionary of potcar stat data. Mapping is calculation type -> potcar symbol -> hash value.
         """
 
         nelements = task_doc.nelements or None
@@ -120,7 +120,7 @@ class ValidationDoc(EmmetBaseModel):
 
         reasons = []
         data = {}  # type: ignore
-        warnings: List[str] = []
+        warnings: list[str] = []
 
         if str(calc_type) in input_sets:
             try:
@@ -184,7 +184,7 @@ class ValidationDoc(EmmetBaseModel):
                 curr_ismear = incar.get("ISMEAR", 1)
                 if curr_ismear != valid_ismear:
                     warnings.append(
-                        f"Inappropriate smearing settings. Set to {curr_ismear},"
+                        f"Inappropriate smearing settings. set to {curr_ismear},"
                         f" but should be {valid_ismear}"
                     )
 
@@ -237,7 +237,7 @@ class ValidationDoc(EmmetBaseModel):
 def _get_input_set(run_type, task_type, calc_type, structure, input_sets, bandgap):
     # Ensure inputsets get proper additional input values
     if "SCAN" in run_type.value:
-        valid_input_set: VaspInputSet = input_sets[str(calc_type)](structure, bandgap=bandgap)  # type: ignore
+        valid_input_set: VaspInputset = input_sets[str(calc_type)](structure, bandgap=bandgap)  # type: ignore
     elif task_type == TaskType.NSCF_Uniform or task_type == TaskType.NSCF_Line:
         # Constructing the k-path for line-mode calculations is too costly, so
         # the uniform input set is used instead and k-points are not checked.

@@ -1,7 +1,6 @@
 """
-Settings for defaults in the build pipelines for the Materials Project
+settings for defaults in the build pipelines for the Materials Project
 """
-from typing import List
 
 from pydantic.fields import Field
 
@@ -11,35 +10,35 @@ from emmet.core.vasp.calc_types import TaskType as VaspTaskType
 from emmet.core.qchem.calc_types import TaskType as QChemTaskType
 
 
-class EmmetBuildSettings(EmmetSettings):
+class EmmetBuildsettings(EmmetSettings):
     """
-    Settings for the emmet-builder module
+    settings for the emmet-builder module
     The default way to modify these is to modify ~/.emmet.json or set the environment variable
     EMMET_CONFIG_FILE to point to the json with emmet settings
     """
 
-    BUILD_TAGS: List[str] = Field(
+    BUILD_TAGS: list[str] = Field(
         [], description="Tags for calculations to build materials"
     )
-    EXCLUDED_TAGS: List[str] = Field(
+    EXCLUDED_TAGS: list[str] = Field(
         [],
         description="Tags to exclude from materials",
     )
 
-    DEPRECATED_TAGS: List[str] = Field(
+    DEPRECATED_TAGS: list[str] = Field(
         [], description="Tags for calculations to deprecate"
     )
 
-    NON_COMMERCIAL_TAGS: List[str] = Field(
+    NON_COMMERCIAL_TAGS: list[str] = Field(
         [], description="Tages for which to add BY-NC as license data in builder_meta"
     )
 
-    VASP_ALLOWED_VASP_TYPES: List[VaspTaskType] = Field(
+    VASP_ALLOWED_VASP_TYPES: list[VaspTaskType] = Field(
         [t.value for t in VaspTaskType],
         description="Allowed task_types to build materials from",
     )
 
-    QCHEM_ALLOWED_TASK_TYPES: List[QChemTaskType] = Field(
+    QCHEM_ALLOWED_TASK_TYPES: list[QChemTaskType] = Field(
         [
             "Single Point",
             "Force",

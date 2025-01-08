@@ -1,5 +1,5 @@
 from pathlib import Path
-from emmet.builders.settings import EmmetBuildSettings
+from emmet.builders.settings import EmmetBuildsettings
 
 import pytest
 from maggma.stores import JSONStore, MemoryStore
@@ -16,7 +16,7 @@ def tasks_store(test_dir):
 
 @pytest.fixture(scope="session")
 def validation_store(tasks_store):
-    settings = EmmetBuildSettings(VASP_VALIDATE_POTCAR_STATS=False)
+    settings = EmmetBuildsettings(VASP_VALIDATE_POTCAR_STATS=False)
     validation_store = MemoryStore()
     builder = TaskValidator(
         tasks=tasks_store, task_validation=validation_store, settings=settings

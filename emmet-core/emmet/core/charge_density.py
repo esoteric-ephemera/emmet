@@ -1,4 +1,4 @@
-from pydantic import ConfigDict, BaseModel, Field
+from pydantic import Configdict, BaseModel, Field
 from datetime import datetime
 from typing import Optional
 
@@ -23,7 +23,7 @@ class VolumetricDataDoc(BaseModel):
         "This comes in the form: mp-******.",
     )
 
-    model_config = ConfigDict(extra="allow")
+    model_config = Configdict(extra="allow")
 
 
 class ChgcarDataDoc(VolumetricDataDoc):

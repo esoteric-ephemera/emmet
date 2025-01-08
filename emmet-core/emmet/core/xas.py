@@ -1,6 +1,5 @@
 import warnings
 from itertools import groupby
-from typing import List
 
 import numpy as np
 from pydantic import Field
@@ -52,10 +51,10 @@ class XASDoc(SpectrumDoc):
 
     spectrum: XAS
 
-    task_ids: List[str] = Field(
+    task_ids: list[str] = Field(
         ...,
         title="Calculation IDs",
-        description="List of Calculations IDs used to make this XAS spectrum.",
+        description="list of Calculations IDs used to make this XAS spectrum.",
     )
 
     absorbing_element: Element = Field(..., description="Absoring element.")
@@ -92,8 +91,8 @@ class XASDoc(SpectrumDoc):
 
     @classmethod
     def from_task_docs(
-        cls, all_tasks: List[TaskDocument], material_id: MPID, num_samples: int = 200
-    ) -> List["XASDoc"]:
+        cls, all_tasks: list[TaskDocument], material_id: MPID, num_samples: int = 200
+    ) -> list["XASDoc"]:
         """
         Converts a set of FEFF Task Documents into XASDocs by merging XANES + EXAFS into XAFS spectra first
         and then merging along equivalent elements to get element averaged spectra
@@ -104,8 +103,8 @@ class XASDoc(SpectrumDoc):
             num_samples: number of sampled points for site-weighted averaging
         """
 
-        all_spectra: List[XAS] = []
-        averaged_spectra: List[XAS] = []
+        all_spectra: list[XAS] = []
+        averaged_spectra: list[XAS] = []
 
         # This is a hack using extra attributes within this function to carry some extra information
         # without generating new objects
@@ -127,7 +126,7 @@ class XASDoc(SpectrumDoc):
         )
 
         # Generate Merged Spectra
-        # Dictionary of all site to spectra mapping
+        # dictionary of all site to spectra mapping
         sites_to_spectra = {
             index: list(group)
             for index, group in groupby(
@@ -223,7 +222,7 @@ class XASDoc(SpectrumDoc):
         return spectra_docs
 
 
-def _is_missing_sites(spectra: List[XAS]):
+def _is_missing_sites(spectra: list[XAS]):
     """
     Determines if the collection of spectra are missing any indicies for the given element
     """

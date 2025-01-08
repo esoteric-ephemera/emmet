@@ -1,7 +1,7 @@
 # mypy: ignore-errors
 
 """ Core definition of a Q-Chem Task Document """
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 import logging
 import re
 from collections import OrderedDict
@@ -62,26 +62,26 @@ class OutputDoc(BaseModel):
     entropy: Optional[float] = Field(
         None, description="Total entropy of the molecule (units: cal/mol-K"
     )
-    dipoles: Optional[Dict[str, Any]] = Field(
+    dipoles: Optional[dict[str, Any]] = Field(
         None, description="Dipolar information from the output"
     )
-    mulliken: Optional[List[Any]] = Field(
+    mulliken: Optional[list[Any]] = Field(
         None, description="Mulliken atomic partial charges and partial spins"
     )
-    resp: Optional[Union[List[float], List[Any]]] = Field(
+    resp: Optional[Union[list[float], list[Any]]] = Field(
         None,
         description="Restrained Electrostatic Potential (RESP) atomic partial charges",
     )
-    nbo: Optional[Dict[str, Any]] = Field(
+    nbo: Optional[dict[str, Any]] = Field(
         None, description="Natural Bonding Orbital (NBO) output"
     )
 
-    frequencies: Optional[Union[Dict[str, Any], List]] = Field(
+    frequencies: Optional[Union[dict[str, Any], list]] = Field(
         None,
         description="The list of calculated frequencies if job type is freq (units: cm^-1)",
     )
 
-    frequency_modes: Optional[Union[List, str]] = Field(
+    frequency_modes: Optional[Union[list, str]] = Field(
         None,
         description="The list of calculated frequency mode vectors if job type is freq",
     )
@@ -128,12 +128,12 @@ class InputDoc(BaseModel):
         description="Input molecule and calc details for the QChem calculation",
     )
 
-    prev_rem_params: Optional[Dict[str, Any]] = Field(
+    prev_rem_params: Optional[dict[str, Any]] = Field(
         None,
         description="Parameters from a previous qchem calculation in the series",
     )
 
-    rem: Dict[str, Any] = Field(
+    rem: dict[str, Any] = Field(
         None,
         description="Parameters from the rem section of the current QChem calculation",
     )
@@ -147,13 +147,13 @@ class InputDoc(BaseModel):
         description="The type of the QChem calculation : optimization, single point ... etc.",
     )
 
-    tags: Union[List[str], None] = Field(
+    tags: Union[list[str], None] = Field(
         [], title="tag", description="Metadata tagged to a given task."
     )
 
-    solvation_lot_info: Optional[Union[Dict[str, Any], str]] = Field(
+    solvation_lot_info: Optional[Union[dict[str, Any], str]] = Field(
         None,
-        description="Str or Dict representation of the solvent method used for the calculation",
+        description="Str or dict representation of the solvent method used for the calculation",
     )
 
     special_run_type: Optional[str] = Field(
@@ -210,13 +210,13 @@ class InputDoc(BaseModel):
 
 
 class CustodianDoc(BaseModel):
-    corrections: Optional[List[Any]] = Field(
+    corrections: Optional[list[Any]] = Field(
         None,
         title="Custodian Corrections",
-        description="List of custodian correction data for calculation.",
+        description="list of custodian correction data for calculation.",
     )
 
-    job: Optional[Union[Dict[str, Any], QCJob]] = Field(
+    job: Optional[Union[dict[str, Any], QCJob]] = Field(
         None,
         title="Custodian Job Data",
         description="Job data logged by custodian.",
@@ -239,7 +239,7 @@ class TaskDoc(MoleculeMetadata):
         None, description="State of this QChem calculation"
     )
 
-    calcs_reversed: Optional[List[Calculation]] = Field(
+    calcs_reversed: Optional[list[Calculation]] = Field(
         None,
         title="Calcs reversed data",
         description="Detailed data for each QChem calculation contributing to the task document.",
@@ -249,7 +249,7 @@ class TaskDoc(MoleculeMetadata):
         None, description="the type of QChem calculation"
     )
 
-    orig_inputs: Optional[Union[CalculationInput, Dict[str, Any]]] = Field(
+    orig_inputs: Optional[Union[CalculationInput, dict[str, Any]]] = Field(
         {}, description="Summary of the original Q-Chem inputs"
     )
 
@@ -265,22 +265,22 @@ class TaskDoc(MoleculeMetadata):
 
     # TODO: Implement entry dict
 
-    custodian: Optional[List[CustodianDoc]] = Field(
+    custodian: Optional[list[CustodianDoc]] = Field(
         None,
         title="Calcs reversed data",
         description="Detailed custodian data for each QChem calculation contributing to the task document.",
     )
 
-    critic2: Optional[Dict[str, Any]] = Field(
+    critic2: Optional[dict[str, Any]] = Field(
         None, description="Outputs from the critic2 calculation if performed"
     )
 
-    custom_smd: Optional[Union[str, Dict[str, Any]]] = Field(
+    custom_smd: Optional[Union[str, dict[str, Any]]] = Field(
         None,
         description="The seven solvent parameters necessary to define a custom_smd model",
     )
 
-    additional_fields: Optional[Dict[str, Any]] = Field(
+    additional_fields: Optional[dict[str, Any]] = Field(
         None, description="Any miscellaneous fields passed to the pydantic model"
     )
 
@@ -292,7 +292,7 @@ class TaskDoc(MoleculeMetadata):
         dir_name: Union[Path, str],
         validate_lot: bool = True,
         store_additional_json: bool = True,
-        additional_fields: Dict[str, Any] = None,
+        additional_fields: dict[str, Any] = None,
         **qchem_calculation_kwargs,
     ) -> _T:
         """
@@ -308,7 +308,7 @@ class TaskDoc(MoleculeMetadata):
         store_additional_json
             Whether to store additional json files in the calculation directory.
         additional_fields
-            Dictionary of additional fields to add to output document.
+            dictionary of additional fields to add to output document.
         **qchem_calculation_kwargs
             Additional parsing options that will be passed to the
             :obj:`.Calculation.from_qchem_files` function.
@@ -344,7 +344,7 @@ class TaskDoc(MoleculeMetadata):
                 calcs_reversed.append(calc_doc)
                 # all_qchem_objects.append(qchem_objects)
 
-        # Lists need to be reversed so that newest calc is the first calc, all_qchem_objects are also reversed to match
+        # lists need to be reversed so that newest calc is the first calc, all_qchem_objects are also reversed to match
         calcs_reversed.reverse()
 
         # all_qchem_objects.reverse()
@@ -405,8 +405,8 @@ class TaskDoc(MoleculeMetadata):
 
     @staticmethod
     def get_entry(
-        calcs_reversed: List[Calculation], task_id: Optional[str] = None
-    ) -> Dict:
+        calcs_reversed: list[Calculation], task_id: Optional[str] = None
+    ) -> dict:
         """
         Get a computed entry from a list of QChem calculation documents.
 
@@ -419,7 +419,7 @@ class TaskDoc(MoleculeMetadata):
 
         Returns
         --------
-        Dict
+        dict
             A dict of computed entries
         """
 
@@ -478,7 +478,7 @@ def get_uri(dir_name: Union[str, Path]) -> str:
     return f"{hostname}:{fullpath}"
 
 
-def _parse_custodian(dir_name: Path) -> Optional[Dict]:
+def _parse_custodian(dir_name: Path) -> Optional[dict]:
     """
     Parse custodian.json file.
 
@@ -492,7 +492,7 @@ def _parse_custodian(dir_name: Path) -> Optional[Dict]:
 
     Returns
     --------
-    Optional[Dict]
+    Optional[dict]
         The information parsed from custodian.json file.
     """
     filenames = tuple(dir_name.glob("custodian.json*"))
@@ -503,7 +503,7 @@ def _parse_custodian(dir_name: Path) -> Optional[Dict]:
 
 def _parse_orig_inputs(
     dir_name: Path,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Parse original input files.
 
@@ -517,7 +517,7 @@ def _parse_orig_inputs(
 
     Returns
     -------
-    Dict[str, Any]
+    dict[str, Any]
         The original molecule, rem, solvent and other data.
     """
     orig_inputs = {}
@@ -529,7 +529,7 @@ def _parse_orig_inputs(
     return orig_inputs
 
 
-def _parse_additional_json(dir_name: Path) -> Dict[str, Any]:
+def _parse_additional_json(dir_name: Path) -> dict[str, Any]:
     """Parse additional json files in the directory."""
     additional_json = {}
     for filename in dir_name.glob("*.json*"):
@@ -540,7 +540,7 @@ def _parse_additional_json(dir_name: Path) -> Dict[str, Any]:
     return additional_json
 
 
-def _get_state(calcs_reversed: List[Calculation]) -> QChemStatus:
+def _get_state(calcs_reversed: list[Calculation]) -> QChemStatus:
     """Get state from calculation documents of QChem tasks."""
     all_calcs_completed = all(
         [c.has_qchem_completed == QChemStatus.SUCCESS for c in calcs_reversed]
@@ -550,7 +550,7 @@ def _get_state(calcs_reversed: List[Calculation]) -> QChemStatus:
     return QChemStatus.FAILED
 
 
-# def _get_run_stats(calcs_reversed: List[Calculation]) -> Dict[str, RunStatistics]:
+# def _get_run_stats(calcs_reversed: list[Calculation]) -> dict[str, RunStatistics]:
 #     """Get summary of runtime statistics for each calculation in this task."""
 
 #     run_stats = {}
@@ -567,7 +567,7 @@ def _get_state(calcs_reversed: List[Calculation]) -> QChemStatus:
 
 def _find_qchem_files(
     path: Union[str, Path],
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Find QChem files in a directory.
 
@@ -582,7 +582,7 @@ def _find_qchem_files(
 
     Returns
     -------
-    Dict[str, Any]
+    dict[str, Any]
         The filenames of the calculation outputs for each QChem task, given as a ordered dictionary of::
 
             {

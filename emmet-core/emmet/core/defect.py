@@ -9,7 +9,7 @@ from monty.json import MontyDecoder
 from pydantic import BaseModel
 
 if TYPE_CHECKING:
-    from typing import Any, Dict, Optional, Tuple, Union
+    from typing import Any, Optional, Union
     from pathlib import Path
 
 mdecoder = MontyDecoder().process_decoded
@@ -55,8 +55,8 @@ class DefectTaskDoc(DefectInfo, TaskDoc):
     def from_directory(
         cls,
         dir_name: Union[Path, str],
-        volumetric_files: Tuple[str, ...] = _VOLUMETRIC_FILES,
-        additional_fields: Optional[Dict[str, Any]] = None,
+        volumetric_files: tuple[str, ...] = _VOLUMETRIC_FILES,
+        additional_fields: Optional[dict[str, Any]] = None,
         volume_change_warning_tol: float = 0.2,
         defect_info_key: str = "info",
         **vasp_calculation_kwargs,
@@ -73,7 +73,7 @@ class DefectTaskDoc(DefectInfo, TaskDoc):
         volumetric_files
             Volumetric files to search for.
         additional_fields
-            Dictionary of additional fields to add to output document.
+            dictionary of additional fields to add to output document.
         volume_change_warning_tol
             Maximum volume change allowed in VASP relaxations before the calculation is
             tagged with a warning.

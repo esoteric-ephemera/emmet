@@ -1,4 +1,4 @@
-from typing import List, Optional, Dict, Any
+from typing import Optional, Any
 from hashlib import blake2b
 
 from pydantic import Field
@@ -224,65 +224,65 @@ class OrbitalDoc(PropertyDoc):
         ..., description="Is this molecule open-shell (spin multiplicity != 1)?"
     )
 
-    nbo_population: List[NaturalPopulation] = Field(
+    nbo_population: list[NaturalPopulation] = Field(
         ..., description="Natural electron populations of the molecule"
     )
 
     # Populated for closed-shell molecules
-    nbo_lone_pairs: Optional[List[LonePair]] = Field(
+    nbo_lone_pairs: Optional[list[LonePair]] = Field(
         None, description="Lone pair orbitals of a closed-shell molecule"
     )
 
-    nbo_bonds: Optional[List[Bond]] = Field(
+    nbo_bonds: Optional[list[Bond]] = Field(
         None, description="Bond-like orbitals of a closed-shell molecule"
     )
 
-    nbo_interactions: Optional[List[Interaction]] = Field(
+    nbo_interactions: Optional[list[Interaction]] = Field(
         None, description="Orbital-orbital interactions of a closed-shell molecule"
     )
 
     # Populated for open-shell molecules
-    alpha_population: Optional[List[NaturalPopulation]] = Field(
+    alpha_population: Optional[list[NaturalPopulation]] = Field(
         None,
         description="Natural electron populations of the alpha electrons of an "
         "open-shell molecule",
     )
-    beta_population: Optional[List[NaturalPopulation]] = Field(
+    beta_population: Optional[list[NaturalPopulation]] = Field(
         None,
         description="Natural electron populations of the beta electrons of an "
         "open-shell molecule",
     )
 
-    alpha_lone_pairs: Optional[List[LonePair]] = Field(
+    alpha_lone_pairs: Optional[list[LonePair]] = Field(
         None, description="Alpha electron lone pair orbitals of an open-shell molecule"
     )
-    beta_lone_pairs: Optional[List[LonePair]] = Field(
+    beta_lone_pairs: Optional[list[LonePair]] = Field(
         None, description="Beta electron lone pair orbitals of an open-shell molecule"
     )
 
-    alpha_bonds: Optional[List[Bond]] = Field(
+    alpha_bonds: Optional[list[Bond]] = Field(
         None, description="Alpha electron bond-like orbitals of an open-shell molecule"
     )
-    beta_bonds: Optional[List[Bond]] = Field(
+    beta_bonds: Optional[list[Bond]] = Field(
         None, description="Beta electron bond-like orbitals of an open-shell molecule"
     )
 
-    alpha_interactions: Optional[List[Interaction]] = Field(
+    alpha_interactions: Optional[list[Interaction]] = Field(
         None,
         description="Alpha electron orbital-orbital interactions of an open-shell molecule",
     )
-    beta_interactions: Optional[List[Interaction]] = Field(
+    beta_interactions: Optional[list[Interaction]] = Field(
         None,
         description="Beta electron orbital-orbital interactions of an open-shell molecule",
     )
 
     @staticmethod
-    def get_populations(nbo: Dict[str, Any], indices: List[int]):
+    def get_populations(nbo: dict[str, Any], indices: list[int]):
         """
         Helper function to extract natural population information
         from NBO output
 
-        :param nbo: Dictionary of NBO output data
+        :param nbo: dictionary of NBO output data
         :param indices: Data subsets from which to extract natural populations
         :return: population_sets (list of lists of NaturalPopulation)
         """
@@ -307,11 +307,11 @@ class OrbitalDoc(PropertyDoc):
         return population_sets
 
     @staticmethod
-    def get_lone_pairs(nbo: Dict[str, Any], indices: List[int]):
+    def get_lone_pairs(nbo: dict[str, Any], indices: list[int]):
         """
         Helper function to extract lone pair information from NBO output
 
-        :param nbo: Dictionary of NBO output data
+        :param nbo: dictionary of NBO output data
         :param indices: Data subsets from which to extract lone pair information
         :return: lone_pairs (list of LonePairs)
         """
@@ -339,11 +339,11 @@ class OrbitalDoc(PropertyDoc):
         return lone_pair_sets
 
     @staticmethod
-    def get_bonds(nbo: Dict[str, Any], indices: List[int]):
+    def get_bonds(nbo: dict[str, Any], indices: list[int]):
         """
         Helper function to extract bonding information from NBO output
 
-        :param nbo: Dictionary of NBO output data
+        :param nbo: dictionary of NBO output data
         :param indices: Data subsets from which to extract bonds
         :return: bonds (list of Bonds)
         """
@@ -380,12 +380,12 @@ class OrbitalDoc(PropertyDoc):
         return bond_sets
 
     @staticmethod
-    def get_interactions(nbo: Dict[str, Any], indices: List[int]):
+    def get_interactions(nbo: dict[str, Any], indices: list[int]):
         """
         Helper function to extract orbital interaction information
         from NBO output
 
-        :param nbo: Dictionary of NBO output data
+        :param nbo: dictionary of NBO output data
         :param indices: Data subsets from which to extract interactions
         :return: interactions (list of Interactions)
         """

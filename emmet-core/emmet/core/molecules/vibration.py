@@ -1,4 +1,3 @@
-from typing import List
 from hashlib import blake2b
 
 from pydantic import Field
@@ -19,24 +18,24 @@ class VibrationDoc(PropertyDoc):
 
     molecule: Molecule = Field(..., description="Molecular structure")
 
-    frequencies: List[float] = Field(
-        ..., description="List of molecular vibrational frequencies"
+    frequencies: list[float] = Field(
+        ..., description="list of molecular vibrational frequencies"
     )
 
-    frequency_modes: List[List[List[float]]] = Field(
+    frequency_modes: list[list[list[float]]] = Field(
         ..., description="Vibrational frequency modes of the molecule"
     )
 
-    ir_intensities: List[float] = Field(
+    ir_intensities: list[float] = Field(
         ...,
         title="IR intensities",
         description="Intensities for IR vibrational spectrum peaks",
     )
 
-    ir_activities: List = Field(
+    ir_activities: list = Field(
         ...,
         title="IR activities",
-        description="List indicating if frequency-modes are IR-active",
+        description="list indicating if frequency-modes are IR-active",
     )
 
     @classmethod

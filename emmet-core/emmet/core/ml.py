@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 from matcalc.elasticity import ElasticityCalc
 from matcalc.eos import EOSCalc
@@ -79,23 +79,23 @@ class MLDoc(ElasticityDoc):
     gamma: Optional[float] = Field(None, description="Lattice angle gamma in degrees")
 
     # equation of state attributes
-    eos: Optional[Dict[str, List[float]]] = Field(
+    eos: Optional[dict[str, list[float]]] = Field(
         None, description="dict with keys energies and volumes"
     )
     bulk_modulus_bm: Optional[float] = Field(None, description="bm.b0_GPa")
 
     # phonons attributes
-    temperatures: Optional[List[float]] = Field(
+    temperatures: Optional[list[float]] = Field(
         None, description="list of temperatures"
     )
-    free_energy: Optional[List[float]] = Field(
+    free_energy: Optional[list[float]] = Field(
         None,
         description="list of Helmholtz free energies at corresponding temperatures",
     )
-    entropy: Optional[List[float]] = Field(
+    entropy: Optional[list[float]] = Field(
         None, description="list of entropies at corresponding temperatures in eV/K"
     )
-    heat_capacity: Optional[List[float]] = Field(
+    heat_capacity: Optional[list[float]] = Field(
         None,
         description="list of heat capacities at constant volume at corresponding "
         "temperatures in eV/K",

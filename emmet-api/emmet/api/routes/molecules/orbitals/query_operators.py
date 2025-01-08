@@ -1,4 +1,4 @@
-from typing import Any, Optional, Dict
+from typing import Any, Optional
 from fastapi import Query
 from maggma.api.query_operator import QueryOperator
 from maggma.api.utils import STORE_PARAMS
@@ -46,7 +46,7 @@ class NBOPopulationQuery(QueryOperator):
             None, description="Maximum number of electrons in an atom in this molecule."
         ),
     ) -> STORE_PARAMS:
-        crit: Dict[str, Any] = dict()  # type: ignore
+        crit: dict[str, Any] = dict()  # type: ignore
 
         d = {
             "core_electrons": [min_core_electrons, max_core_electrons],
@@ -157,7 +157,7 @@ class NBOLonePairQuery(QueryOperator):
             None, description="Maximum number of electrons in the lone pair."
         ),
     ) -> STORE_PARAMS:
-        crit: Dict[str, Any] = dict()  # type: ignore
+        crit: dict[str, Any] = dict()  # type: ignore
 
         d = {
             "s_character": [min_s_character, max_s_character],
@@ -319,7 +319,7 @@ class NBOBondQuery(QueryOperator):
             None, description="Maximum number of electrons in the bond."
         ),
     ) -> STORE_PARAMS:
-        crit: Dict[str, Any] = dict()  # type: ignore
+        crit: dict[str, Any] = dict()  # type: ignore
 
         d = {
             "atom1_s_character": [min_s_character_atom1, max_s_character_atom1],
@@ -427,7 +427,7 @@ class NBOInteractionQuery(QueryOperator):
             None, description="Maximum interaction Fock matrix element"
         ),
     ) -> STORE_PARAMS:
-        crit: Dict[str, Any] = dict()  # type: ignore
+        crit: dict[str, Any] = dict()  # type: ignore
 
         d = {
             "perturbation_energy": [min_perturbation_energy, max_perturbation_energy],

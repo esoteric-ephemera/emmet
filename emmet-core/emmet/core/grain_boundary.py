@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 from pydantic import field_validator, BaseModel, Field
 from enum import Enum
 from datetime import datetime
@@ -36,12 +36,12 @@ class GrainBoundaryDoc(BaseModel):
         description="Grain boundary type.",
     )
 
-    rotation_axis: Optional[List[int]] = Field(
+    rotation_axis: Optional[list[int]] = Field(
         None,
         description="Rotation axis.",
     )
 
-    gb_plane: Optional[List[int]] = Field(
+    gb_plane: Optional[list[int]] = Field(
         None,
         description="Grain boundary plane.",
     )

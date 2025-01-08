@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 from fastapi import Query
 from maggma.api.query_operator import QueryOperator
 from maggma.api.utils import STORE_PARAMS
@@ -35,7 +35,7 @@ class BondTypeLengthQuery(QueryOperator):
             )
         key = f"bond_types.{'-'.join(sorted([e.capitalize() for e in elements]))}"
 
-        crit: Dict[str, Any] = {
+        crit: dict[str, Any] = {
             key: dict()  # type: ignore
         }  # type: ignore
 

@@ -1,5 +1,5 @@
 from itertools import permutations
-from typing import Dict, Literal, Optional
+from typing import Literal, Optional
 
 from fastapi import Body, HTTPException, Query
 from maggma.api.query_operator import QueryOperator
@@ -282,9 +282,9 @@ class FindStructureQuery(QueryOperator):
 
     def query(
         self,
-        structure: Dict = Body(
+        structure: dict = Body(
             ...,
-            description="Dictionary representaion of Pymatgen structure object to query with",
+            description="dictionary representaion of Pymatgen structure object to query with",
         ),
         ltol: float = Query(
             0.2,

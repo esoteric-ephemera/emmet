@@ -2,7 +2,8 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import List, Mapping, Type, TypeVar, Union, Optional
+from typing import Type, TypeVar, Union, Optional
+from collections.abc import Mapping
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -61,22 +62,22 @@ class MaterialsDoc(StructureMetadata):
         description="Whether this materials document is deprecated.",
     )
 
-    deprecation_reasons: Optional[List[Union[DeprecationMessage, str]]] = Field(
+    deprecation_reasons: Optional[list[Union[DeprecationMessage, str]]] = Field(
         None,
-        description="List of deprecation tags detailing why this materials document isn't valid.",
+        description="list of deprecation tags detailing why this materials document isn't valid.",
     )
 
-    initial_structures: List[Structure] = Field(
+    initial_structures: list[Structure] = Field(
         [],
         description="Initial structures used in the DFT optimizations corresponding to this material.",
     )
 
-    task_ids: List[MPID] = Field(
+    task_ids: list[MPID] = Field(
         [],
-        description="List of Calculations IDs used to make this Materials Document.",
+        description="list of Calculations IDs used to make this Materials Document.",
     )
 
-    deprecated_tasks: List[str] = Field([], title="Deprecated Tasks")
+    deprecated_tasks: list[str] = Field([], title="Deprecated Tasks")
 
     calc_types: Optional[Mapping[str, str]] = Field(
         None,
@@ -93,11 +94,11 @@ class MaterialsDoc(StructureMetadata):
         default_factory=datetime.utcnow,
     )
 
-    origins: Optional[List[PropertyOrigin]] = Field(
-        None, description="Dictionary for tracking the provenance of properties."
+    origins: Optional[list[PropertyOrigin]] = Field(
+        None, description="dictionary for tracking the provenance of properties."
     )
 
-    warnings: List[str] = Field(
+    warnings: list[str] = Field(
         [], description="Any warnings related to this material."
     )
 
@@ -140,24 +141,24 @@ class CoreMoleculeDoc(MoleculeMetadata):
     )
 
     # TODO: Why might a molecule be deprecated?
-    deprecation_reasons: Optional[List[str]] = Field(
+    deprecation_reasons: Optional[list[str]] = Field(
         None,
-        description="List of deprecation tags detailing why this molecules document isn't valid",
+        description="list of deprecation tags detailing why this molecules document isn't valid",
     )
 
-    initial_molecules: List[Molecule] = Field(
+    initial_molecules: list[Molecule] = Field(
         [],
         description="Initial molecules used in the DFT geometry optimizations corresponding to this molecule",
     )
 
-    task_ids: List[MPID] = Field(
+    task_ids: list[MPID] = Field(
         [],
         title="Calculation IDs",
-        description="List of Calculations IDs used to make this Molecule Document",
+        description="list of Calculations IDs used to make this Molecule Document",
     )
 
     # TODO: Should this be MPID?
-    deprecated_tasks: List[str] = Field([], title="Deprecated Tasks")
+    deprecated_tasks: list[str] = Field([], title="Deprecated Tasks")
 
     calc_types: Optional[Mapping[str, str]] = Field(
         None,
@@ -174,11 +175,11 @@ class CoreMoleculeDoc(MoleculeMetadata):
         default_factory=datetime.utcnow,
     )
 
-    origins: Optional[List[PropertyOrigin]] = Field(
-        None, description="Dictionary for tracking the provenance of properties"
+    origins: Optional[list[PropertyOrigin]] = Field(
+        None, description="dictionary for tracking the provenance of properties"
     )
 
-    warnings: List[str] = Field([], description="Any warnings related to this molecule")
+    warnings: list[str] = Field([], description="Any warnings related to this molecule")
 
     @classmethod
     def from_molecule(

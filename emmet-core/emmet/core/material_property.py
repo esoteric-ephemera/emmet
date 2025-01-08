@@ -1,7 +1,7 @@
 """ Core definition of a Materials Document """
 from __future__ import annotations
 
-from typing import Sequence, Type, TypeVar, Union, List, Optional
+from typing import Sequence, Type, TypeVar, Union, Optional
 
 from pydantic import Field, field_validator
 from pymatgen.core import Structure
@@ -35,9 +35,9 @@ class PropertyDoc(StructureMetadata):
         description="Whether this property document is deprecated.",
     )
 
-    deprecation_reasons: Optional[List[Union[DeprecationMessage, str]]] = Field(
+    deprecation_reasons: Optional[list[Union[DeprecationMessage, str]]] = Field(
         None,
-        description="List of deprecation tags detailing why this document isn't valid.",
+        description="list of deprecation tags detailing why this document isn't valid.",
     )
 
     last_updated: datetime = Field(
@@ -46,7 +46,7 @@ class PropertyDoc(StructureMetadata):
     )
 
     origins: Sequence[PropertyOrigin] = Field(
-        [], description="Dictionary for tracking the provenance of properties."
+        [], description="dictionary for tracking the provenance of properties."
     )
 
     warnings: Sequence[str] = Field(

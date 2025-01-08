@@ -31,7 +31,7 @@
 # from zipfile import ZipFile
 # from bravado.requests_client import RequestsClient
 # from bravado.client import SwaggerClient
-# from typing import Iterator, Iterable, Union, Tuple, Dict, Any
+# from typing import Iterator, Iterable, Union, tuple, dict, Any
 # from urllib.parse import urlparse, urlencode
 # import functools
 # from uuid import uuid4

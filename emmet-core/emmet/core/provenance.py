@@ -1,7 +1,7 @@
 """ Core definition of a Provenance Document """
 import warnings
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Optional
 
 from pybtex.database import BibliographyData, parse_string
 from pybtex.errors import set_strict_mode
@@ -40,8 +40,8 @@ class History(BaseModel):
 
     name: str
     url: str
-    description: Optional[Dict] = Field(
-        None, description="Dictionary of extra data for this history node."
+    description: Optional[dict] = Field(
+        None, description="dictionary of extra data for this history node."
     )
 
     @model_validator(mode="before")
@@ -59,21 +59,21 @@ class SNLAbout(BaseModel):
         "", description="Bibtex reference strings for this material."
     )
 
-    authors: List[Author] = Field([], description="List of authors for this material.")
+    authors: list[Author] = Field([], description="list of authors for this material.")
 
-    remarks: List[str] = Field(
-        [], description="List of remarks for the provenance of this material."
+    remarks: list[str] = Field(
+        [], description="list of remarks for the provenance of this material."
     )
 
-    tags: List[str] = Field([])
+    tags: list[str] = Field([])
 
-    database_IDs: Dict[Database, List[str]] = Field(
+    database_IDs: dict[Database, list[str]] = Field(
         dict(), description="Database IDs corresponding to this material."
     )
 
-    history: List[History] = Field(
+    history: list[History] = Field(
         [],
-        description="List of history nodes specifying the transformations or orignation"
+        description="list of history nodes specifying the transformations or orignation"
         " of this material for the entry closest matching the material input.",
     )
 
@@ -87,7 +87,7 @@ class SNLAbout(BaseModel):
         return convert_datetime(cls, v)
 
 
-class SNLDict(BaseModel):
+class SNLdict(BaseModel):
     """Pydantic validated dictionary for SNL"""
 
     about: SNLAbout
@@ -107,29 +107,29 @@ class ProvenanceDoc(PropertyDoc):
         description="creation date for the first structure corresponding to this material",
     )
 
-    references: List[str] = Field(
+    references: list[str] = Field(
         [], description="Bibtex reference strings for this material"
     )
 
-    authors: List[Author] = Field([], description="List of authors for this material")
+    authors: list[Author] = Field([], description="list of authors for this material")
 
-    remarks: List[str] = Field(
-        [], description="List of remarks for the provenance of this material"
+    remarks: list[str] = Field(
+        [], description="list of remarks for the provenance of this material"
     )
 
-    tags: List[str] = Field([])
+    tags: list[str] = Field([])
 
     theoretical: bool = Field(
         True, description="If this material has any experimental provenance or not"
     )
 
-    database_IDs: Dict[Database, List[str]] = Field(
+    database_IDs: dict[Database, list[str]] = Field(
         dict(), description="Database IDs corresponding to this material"
     )
 
-    history: List[History] = Field(
+    history: list[History] = Field(
         [],
-        description="List of history nodes specifying the transformations or orignation"
+        description="list of history nodes specifying the transformations or orignation"
         " of this material for the entry closest matching the material input",
     )
 
@@ -146,7 +146,7 @@ class ProvenanceDoc(PropertyDoc):
 
     @classmethod
     def from_SNLs(
-        cls, material_id: MPID, structure: Structure, snls: List[SNLDict], **kwargs
+        cls, material_id: MPID, structure: Structure, snls: list[SNLdict], **kwargs
     ) -> "ProvenanceDoc":
         """
         Converts legacy Pymatgen SNLs into a single provenance document

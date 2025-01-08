@@ -47,7 +47,7 @@ class StructureSimilarityBuilder(Builder):
 
         self.logger.info("Structure Similarity Builder Started")
 
-        self.logger.info("Setting indexes")
+        self.logger.info("setting indexes")
 
         # TODO: re-introduce last-updated filtering.
         task_ids = list(self.site_descriptors.distinct(self.site_descriptors.key))

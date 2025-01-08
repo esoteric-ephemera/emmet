@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 from pymatgen.core.structure import Structure
 
 from pydantic import BaseModel, Field
@@ -9,7 +9,7 @@ class SurfaceEntry(BaseModel):
     Surface energies, miller indicies, ...
     """
 
-    miller_index: Optional[List[int]] = Field(
+    miller_index: Optional[list[int]] = Field(
         None,
         description="Miller index of surface.",
     )
@@ -60,9 +60,9 @@ class SurfacePropDoc(BaseModel):
     Model for a document containing surface properties data
     """
 
-    surfaces: Optional[List[SurfaceEntry]] = Field(
+    surfaces: Optional[list[SurfaceEntry]] = Field(
         None,
-        description="List of individual surface data.",
+        description="list of individual surface data.",
     )
 
     weighted_surface_energy_EV_PER_ANG2: Optional[float] = Field(

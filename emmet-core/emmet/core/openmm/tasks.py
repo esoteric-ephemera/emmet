@@ -11,7 +11,7 @@ import pandas as pd  # type: ignore[import-untyped]
 from openmm import XmlSerializer
 from openmm.app import Simulation
 from openmm.app.pdbfile import PDBFile
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, Configdict, Field
 
 from emmet.core.openff import MDTaskDocument  # type: ignore[import-untyped]
 from emmet.core.openff.tasks import CompressedStr  # type: ignore[import-untyped]
@@ -100,7 +100,7 @@ class CalculationInput(BaseModel):  # type: ignore[call-arg]
         description="Whether to embed the trajectory blob in CalculationOutput.",
     )
 
-    model_config = ConfigDict(extra="allow")
+    model_config = Configdict(extra="allow")
 
 
 class CalculationOutput(BaseModel):
@@ -126,25 +126,25 @@ class CalculationOutput(BaseModel):
         None, description="Steps where outputs are reported"
     )
 
-    time: Optional[list[float]] = Field(None, description="List of times")
+    time: Optional[list[float]] = Field(None, description="list of times")
 
     potential_energy: Optional[list[float]] = Field(
-        None, description="List of potential energies"
+        None, description="list of potential energies"
     )
 
     kinetic_energy: Optional[list[float]] = Field(
-        None, description="List of kinetic energies"
+        None, description="list of kinetic energies"
     )
 
     total_energy: Optional[list[float]] = Field(
-        None, description="List of total energies"
+        None, description="list of total energies"
     )
 
-    temperature: Optional[list[float]] = Field(None, description="List of temperatures")
+    temperature: Optional[list[float]] = Field(None, description="list of temperatures")
 
-    volume: Optional[list[float]] = Field(None, description="List of volumes")
+    volume: Optional[list[float]] = Field(None, description="list of volumes")
 
-    density: Optional[list[float]] = Field(None, description="List of densities")
+    density: Optional[list[float]] = Field(None, description="list of densities")
 
     elapsed_time: Optional[float] = Field(
         None, description="Elapsed time for the calculation (seconds)."
