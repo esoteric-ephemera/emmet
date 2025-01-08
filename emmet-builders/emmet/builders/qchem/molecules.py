@@ -139,6 +139,7 @@ class MoleculesAssociationBuilder(Builder):
         self.tasks.ensure_index("formula_alphabetical")
         self.tasks.ensure_index("smiles")
         self.tasks.ensure_index("species_hash")
+        self.tasks.ensure_index("coord_hash")
 
         # Search index for molecules
         self.assoc.ensure_index("molecule_id")
@@ -166,7 +167,9 @@ class MoleculesAssociationBuilder(Builder):
         N = ceil(len(to_process_hashes) / number_splits)
 
         for hash_chunk in grouper(to_process_hashes, N):
-            yield {"query": {"species_hash": {"$in": list(hash_chunk)}}}
+            query = dict(temp_query)
+            query["species_hash"] = {"$in": list(hash_chunk)}
+            yield {"query": query}
 
     def get_items(self) -> Iterator[list[TaskDocument]]:
         """
@@ -391,6 +394,7 @@ class MoleculesBuilder(Builder):
         self.assoc.ensure_index("last_updated")
         self.assoc.ensure_index("task_ids")
         self.assoc.ensure_index("formula_alphabetical")
+        self.assoc.ensure_index("species_hash")
 
         # Search index for molecules
         self.molecules.ensure_index("molecule_id")
@@ -434,16 +438,18 @@ class MoleculesBuilder(Builder):
             xyz_species_id_map[d[self.assoc.key]] = this_id
         to_process_docs = assoc_ids - processed_docs
 
-        to_process_forms = {
-            d["formula_alphabetical"]
+        to_process_hashes = {
+            d["species_hash"]
             for d in all_assoc
             if xyz_species_id_map[d[self.assoc.key]] in to_process_docs
         }
 
-        N = ceil(len(to_process_forms) / number_splits)
+        N = ceil(len(to_process_hashes) / number_splits)
 
-        for formula_chunk in grouper(to_process_forms, N):
-            yield {"query": {"formula_alphabetical": {"$in": list(formula_chunk)}}}
+        for hash_chunk in grouper(to_process_hashes, N):
+            query = dict(temp_query)
+            query["species_hash"] = {"$in": list(hash_chunk)}
+            yield {"query": query}
 
     def get_items(self) -> Iterator[list[dict]]:
         """
@@ -496,21 +502,21 @@ class MoleculesBuilder(Builder):
             xyz_species_id_map[d[self.assoc.key]] = this_id
         to_process_docs = assoc_ids - processed_docs
 
-        to_process_forms = {
-            d["formula_alphabetical"]
+        to_process_hashes = {
+            d["species_hash"]
             for d in all_assoc
             if xyz_species_id_map[d[self.assoc.key]] in to_process_docs
         }
 
         self.logger.info(f"Found {len(to_process_docs)} unprocessed documents")
-        self.logger.info(f"Found {len(to_process_forms)} unprocessed formulas")
+        self.logger.info(f"Found {len(to_process_hashes)} unprocessed hashes")
 
-        # set total for builder bars to have a total
-        self.total = len(to_process_forms)
+        # Set total for builder bars to have a total
+        self.total = len(to_process_hashes)
 
-        for formula in to_process_forms:
+        for shash in to_process_hashes:
             assoc_query = dict(temp_query)
-            assoc_query["formula_alphabetical"] = formula
+            assoc_query["species_hash"] = shash
             assoc = list(self.assoc.query(criteria=assoc_query))
 
             yield assoc
@@ -527,9 +533,9 @@ class MoleculesBuilder(Builder):
         """
 
         assoc = [MoleculeDoc(**item) for item in items]
-        formula = assoc[0].formula_alphabetical
+        shash = assoc[0].species_hash
         mol_ids = [a.molecule_id for a in assoc]
-        self.logger.debug(f"Processing {formula} : {mol_ids}")
+        self.logger.debug(f"Processing {shash} : {mol_ids}")
 
         complete_mol_docs = list()
 
@@ -647,7 +653,7 @@ class MoleculesBuilder(Builder):
 
                 complete_mol_docs.append(base_doc)
 
-        self.logger.debug(f"Produced {len(complete_mol_docs)} molecules for {formula}")
+        self.logger.debug(f"Produced {len(complete_mol_docs)} molecules for {shash}")
 
         return jsanitize(
             [mol.model_dump() for mol in complete_mol_docs], allow_bson=True

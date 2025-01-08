@@ -8,11 +8,17 @@ from pymatgen.core.composition import Composition
 from pymatgen.core.periodic_table import Element
 from pymatgen.core.structure import Molecule, Structure
 
+from emmet.core.utils import get_graph_hash
 from emmet.core.base import EmmetBaseModel
 from emmet.core.symmetry import PointGroupData, SymmetryData
 
 T = TypeVar("T", bound="StructureMetadata")
 S = TypeVar("S", bound="MoleculeMetadata")
+
+try:
+    from openbabel import openbabel
+except Exception:
+    openbabel = None
 
 
 class StructureMetadata(EmmetBaseModel):
@@ -202,6 +208,16 @@ class MoleculeMetadata(EmmetBaseModel):
     symmetry: Optional[PointGroupData] = Field(
         None, description="Symmetry data for this molecule"
     )
+    species_hash: Optional[str] = Field(
+        None,
+        description="Weisfeiler Lehman (WL) graph hash using the atom species as the graph "
+        "node attribute.",
+    )
+    coord_hash: Optional[str] = Field(
+        None,
+        description="Weisfeiler Lehman (WL) graph hash using the atom coordinates as the graph "
+        "node attribute.",
+    )
 
     @classmethod
     def from_composition(
@@ -278,6 +294,8 @@ class MoleculeMetadata(EmmetBaseModel):
                 "formula_anonymous",
                 "chemsys",
                 "symmetry",
+                "species_hash",
+                "coord_hash",
             ]
             if fields is None
             else fields
@@ -301,5 +319,8 @@ class MoleculeMetadata(EmmetBaseModel):
             "chemsys": "-".join(elsyms),
             "symmetry": symmetry,
         }
+        if openbabel:
+            data["species_hash"] = get_graph_hash(meta_molecule, "specie")
+            data["coord_hash"] = get_graph_hash(meta_molecule, "coords")
 
         return cls(**{k: v for k, v in data.items() if k in fields}, **kwargs)

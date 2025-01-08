@@ -458,9 +458,60 @@ class LicenseQuery(QueryOperator):
 
     def query(
         self,
-        license: Optional[Literal["BY-C", "BY-NC"]] = Query(
+        license: Optional[Literal["BY-C", "BY-NC", "All"]] = Query(
             "BY-C",
-            description="Query by license. Either commercial or non-commercial CC-BY",
+            description="Query by license. Can be commercial or non-commercial, or both",
         ),
     ) -> STORE_PARAMS:
-        return {"criteria": {"builder_meta.license": license}}
+        q = {"$in": ["BY-C", "BY-NC"]} if license == "All" else license
+        return {"criteria": {"builder_meta.license": q}}
+
+
+class BatchIdQuery(QueryOperator):
+    """Method to generate a query on batch_id"""
+
+    def query(
+        self,
+        batch_id: Optional[str] = Query(
+            None,
+            description="Query by batch identifier",
+        ),
+        batch_id_not_eq: Optional[str] = Query(
+            None,
+            description="Exclude batch identifier",
+        ),
+        batch_id_eq_any: Optional[str] = Query(
+            None,
+            description="Query by a comma-separated list of batch identifiers",
+        ),
+        batch_id_neq_any: Optional[str] = Query(
+            None,
+            description="Exclude a comma-separated list of batch identifiers",
+        ),
+    ) -> STORE_PARAMS:
+        # NOTE: maggma's StringQueryOperator doesn't work for nested fields?
+        all_kwargs = [batch_id, batch_id_not_eq, batch_id_eq_any, batch_id_neq_any]
+        if sum(bool(kwarg) for kwarg in all_kwargs) > 1:
+            raise HTTPException(
+                status_code=400,
+                detail="Please only choose one of `batch_id` parameters to filter.",
+            )
+
+        crit = {}  # type: dict
+        k = "builder_meta.batch_id"
+        if batch_id:
+            crit[k] = batch_id
+        elif batch_id_not_eq:
+            crit[k] = {"$ne": batch_id_not_eq}
+        elif batch_id_eq_any or batch_id_neq_any:
+            value = batch_id_eq_any if batch_id_eq_any else batch_id_neq_any
+            batch_ids = [batch_id.strip() for batch_id in value.split(",")]  # type: ignore
+            if len(batch_ids) > 1:
+                crit[k] = {"$in" if batch_id_eq_any else "$nin": batch_ids}
+            else:
+                crit[k] = batch_ids[0] if batch_id_eq_any else {"$ne": batch_ids[0]}
+
+        return {"criteria": crit}
+
+    def ensure_indexes(self):  # pragma: no cover
+        return [("builder_meta.batch_id", False)]
