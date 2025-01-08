@@ -1,4 +1,3 @@
-
 Vector3D = tuple[float, float, float]
 Vector3D.__doc__ = "Real space vector"  # type: ignore
 

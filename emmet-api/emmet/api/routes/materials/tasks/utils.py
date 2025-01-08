@@ -1,4 +1,3 @@
-
 from fastapi import HTTPException
 from pymatgen.analysis.structure_analyzer import oxide_type
 from pymatgen.core import Structure

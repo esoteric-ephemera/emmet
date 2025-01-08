@@ -1,7 +1,7 @@
 # mypy: ignore-errors
 
 """ Core definition of a VASP Task Document """
-from typing import Any,  Union, Optional
+from typing import Any, Union, Optional
 
 from pydantic import BaseModel, Field
 from pymatgen.analysis.structure_analyzer import oxide_type

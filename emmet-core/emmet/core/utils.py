@@ -1,4 +1,3 @@
-
 from collections.abc import Iterator
 import copy
 import datetime

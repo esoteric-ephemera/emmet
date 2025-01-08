@@ -3,7 +3,7 @@ import copy
 from datetime import datetime
 from itertools import chain, groupby
 from math import ceil
-from typing import Any,  Optional, Union
+from typing import Any, Optional, Union
 from collections.abc import Iterable, Iterator
 
 from maggma.builders import Builder

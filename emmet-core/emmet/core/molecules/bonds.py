@@ -1,4 +1,4 @@
-from typing import Any, Optional 
+from typing import Any, Optional
 import copy
 from hashlib import blake2b
 

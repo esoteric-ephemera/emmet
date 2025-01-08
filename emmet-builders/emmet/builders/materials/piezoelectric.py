@@ -1,5 +1,5 @@
 from math import ceil
-from typing import  Optional
+from typing import Optional
 
 import numpy as np
 from maggma.builders import Builder
