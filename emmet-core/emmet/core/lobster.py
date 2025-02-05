@@ -45,11 +45,19 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
-def aggregate_paths(dir_name : Path,) -> dict[str,Path]:
+def aggregate_paths(
+    dir_name: Path,
+) -> dict[str, Path]:
     paths = {}
     for p in dir_name.glob("*.lobster*"):
         paths[p.name.split(".lobster")[0]] = p
-    for p in ("POTCAR","POSCAR","vasprun.xml","lobsterin","lobsterout",):
+    for p in (
+        "POTCAR",
+        "POSCAR",
+        "vasprun.xml",
+        "lobsterin",
+        "lobsterout",
+    ):
         paths[p] = emmet_zpath(dir_name / p)
     return paths
 
@@ -161,6 +169,7 @@ class Bonding(BaseModel):
         None, description="Percentage of bonding contribution"
     )
 
+
 class BondsInfo(BaseModel):
     """Model describing bonds field of SiteInfo."""
 
@@ -229,7 +238,9 @@ class DictIons(BaseModel):
         "and counts for them",
     )
 
-#TODO extricate this from individual dicts
+
+# TODO extricate this from individual dicts
+
 
 class DictBonds(BaseModel):
     """Model describing final_dict_bonds field of CondensedBondingAnalysis."""
@@ -297,7 +308,7 @@ class CondensedBondingAnalysis(BaseModel):
     def from_directory(
         cls,
         dir_name: str | Path,
-        save_cohp_plots: bool = True,
+        save_cohp_plots: bool = False,
         lobsterpy_kwargs: dict = None,
         plot_kwargs: dict = None,
         which_bonds: str = "all",
@@ -406,8 +417,9 @@ class CondensedBondingAnalysis(BaseModel):
             sb = _identify_strongest_bonds(
                 analyse=analyse,
                 **{
-                    f"{k.lower()}_path" : file_paths.get(k) for k in ("ICOBILIST","ICOHPLIST","ICOOPLIST")
-                }
+                    f"{k.lower()}_path": file_paths.get(k)
+                    for k in ("ICOBILIST", "ICOHPLIST", "ICOOPLIST")
+                },
             )
 
         except ValueError:
@@ -560,7 +572,7 @@ class CalcQualitySummary(BaseModel):
 
         file_paths = aggregate_paths(dir_name)
         doscar_path = file_paths.get("DOSCAR.LSO") or file_paths.get("DOSCAR")
-        
+
         # Update calc quality kwargs supplied by user
         calc_quality_kwargs_updated = {
             "e_range": [-20, 0],
@@ -612,9 +624,7 @@ class LobsterTaskDocument(StructureMetadata):  # type: ignore[call-arg]
     """Definition of LOBSTER task document."""
 
     structure: Structure = Field(description="The structure used in this task")
-    dir_name: str = Field(
-        description="The directory for this Lobster task"
-    )
+    dir_name: str = Field(description="The directory for this Lobster task")
     last_updated: datetime = Field(
         default_factory=utcnow,
         description="Timestamp for this task document was last updated",
@@ -701,14 +711,14 @@ class LobsterTaskDocument(StructureMetadata):  # type: ignore[call-arg]
         None, description="pymatgen Icohplist object with ICOBI data"
     )
 
-    #atomate2_version: str = Field(
+    # atomate2_version: str = Field(
     #    __version__, description="Version of atomate2 used to create the document"
-    #)
+    # )
 
     @classmethod
     @requires(
         Analysis,
-        "LobsterTaskDocument requires lobsterpy and ijson to function properly. "
+        "LobsterTaskDocument requires lobsterpy and ijson to function properly. ",
     )
     def from_directory(
         cls,
@@ -768,9 +778,7 @@ class LobsterTaskDocument(StructureMetadata):  # type: ignore[call-arg]
         file_paths = aggregate_paths(dir_name)
         lobsterout_doc = Lobsterout(file_paths["lobsterout"]).get_doc()
         lobster_out = LobsteroutModel(**lobsterout_doc)
-        lobster_in = LobsterinModel(
-            **Lobsterin.from_file(file_paths["lobsterin"])
-        )
+        lobster_in = LobsterinModel(**Lobsterin.from_file(file_paths["lobsterin"]))
 
         icohp_list = icoop_list = icobi_list = None
         if file_paths.get("ICOHPLIST"):
@@ -793,9 +801,7 @@ class LobsterTaskDocument(StructureMetadata):  # type: ignore[call-arg]
         describe = None
         describe_ionic = None
         if analyze_outputs:
-            if all(
-                file_paths.get(k) for k in ("ICOHPLIST","COHPCAR","CHARGE")
-            ):
+            if all(file_paths.get(k) for k in ("ICOHPLIST", "COHPCAR", "CHARGE")):
                 (
                     condensed_bonding_analysis,
                     describe,
@@ -830,12 +836,16 @@ class LobsterTaskDocument(StructureMetadata):  # type: ignore[call-arg]
             )
 
         # Read in charges
-        charges = Charge(filename=file_paths["CHARGE"]) if file_paths.get("CHARGE") else None
+        charges = (
+            Charge(filename=file_paths["CHARGE"]) if file_paths.get("CHARGE") else None
+        )
 
         # Read in DOS
         dos = None
         if file_paths.get("DOSCAR"):
-            doscar_lobster = Doscar(doscar=file_paths["DOSCAR"], structure_file=file_paths["POSCAR"])
+            doscar_lobster = Doscar(
+                doscar=file_paths["DOSCAR"], structure_file=file_paths["POSCAR"]
+            )
             dos = doscar_lobster.completedos
 
         # Read in LSO DOS
@@ -849,7 +859,9 @@ class LobsterTaskDocument(StructureMetadata):  # type: ignore[call-arg]
         # Read in Madelung energies
         madelung_energies = None
         if file_paths.get("MadelungEnergies"):
-            madelung_energies = MadelungEnergies(filename=file_paths["MadelungEnergies"])
+            madelung_energies = MadelungEnergies(
+                filename=file_paths["MadelungEnergies"]
+            )
 
         # Read in Site Potentials
         site_potentials = None
