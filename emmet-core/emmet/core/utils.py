@@ -2,10 +2,12 @@ import copy
 import datetime
 from enum import Enum
 from itertools import groupby
+from pathlib import Path
 from typing import Any, Dict, Iterator, List, Optional, Union
 
 import numpy as np
 from monty.json import MSONable
+from monty.os.path import zpath as monty_zpath
 from pydantic import BaseModel
 from pymatgen.analysis.elasticity.strain import Deformation
 from pymatgen.analysis.graphs import MoleculeGraph
@@ -437,3 +439,7 @@ class IgnoreCaseEnum(ValueEnum):
 def utcnow() -> datetime.datetime:
     """Get UTC time right now."""
     return datetime.datetime.now(datetime.timezone.utc)
+
+def emmet_zpath(pathname: str | Path) -> Path:
+    """Kludge to fix monty zpath bug."""
+    return Path(monty_zpath(str(pathname)))
