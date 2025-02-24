@@ -7,11 +7,11 @@ import copy
 import logging
 from emmet.core.base import EmmetBaseModel
 from emmet.core.vasp.task_valid import TaskState
+from emmet.core.neb import NebPathwayResult
 from pymatgen.core import Structure
 from pymatgen.analysis.structure_matcher import StructureMatcher
 from pymatgen.entries.computed_entries import ComputedEntry, ComputedStructureEntry
 from pymatgen.analysis.diffusion.utils.edge_data_from_sc import add_edge_data_from_sc
-from atomate2.common.schemas.neb import NebPathwayResult
 
 try:
     from pymatgen.analysis.diffusion.neb.full_path_mapper import MigrationGraph
@@ -508,7 +508,7 @@ class MigrationGraphDoc(EmmetBaseModel):
                 "barrier": max(data.forward_barrier, data.reverse_barrier),
                 "energies": data.energies,
                 "state": data.state,
-                "calc_metadata": data.metadata,
+                # "calc_metadata": data.metadata,
                 "input_endpoints": [data.initial_images[0], data.initial_images[-1]],
                 "output_structs": data.images,
             }
