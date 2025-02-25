@@ -193,7 +193,10 @@ class MigrationGraphDoc(EmmetBaseModel):
 
     @classmethod
     def augment_from_mgd_and_npr(
-        cls, mgd: "MigrationGraphDoc", npr: NebPathwayResult
+        cls,
+        mgd: "MigrationGraphDoc",
+        npr: NebPathwayResult,
+        barrier_type: str = "barrier",
     ) -> "MigrationGraphDoc":
         """
         This class method takes an existing MigrationGraphDoc and augments it by populating
@@ -202,7 +205,7 @@ class MigrationGraphDoc(EmmetBaseModel):
         """
         mgd_w_cost = mgd.model_copy(deep=True)
         paths_summary, mg_new = cls.get_paths_summary_with_neb_res(
-            mg=mgd_w_cost.migration_graph, npr=npr
+            mg=mgd_w_cost.migration_graph, npr=npr, barrier_type=barrier_type
         )
         mgd_w_cost.paths_summary = paths_summary
         mgd_w_cost.migration_graph_w_cost = mg_new
@@ -425,12 +428,28 @@ class MigrationGraphDoc(EmmetBaseModel):
 
     @staticmethod
     def get_paths_summary_with_neb_res(
-        mg: MigrationGraph, npr: NebPathwayResult
+        mg: MigrationGraph, npr: NebPathwayResult, barrier_type: str
     ) -> Tuple[Dict[int, List], MigrationGraph]:
         """
         This is a post-processing function that matches the results of transition state cals (NEB or ApproxNEB)
         and unique_hops in the MigrationGraph, and then outputs a ranked list according to the calculated barrier
+
+        Parameters
+        ----------
+        mgd: MigrationGraphDoc
+            The doc to be matched and get paths from
+        npr: NebPathwayResult
+            The doc used to get transition state calc info
+        barrier_type: str
+            The type of barrier used to assign cost. Currently supporting
+            'barrier': max of forward & reverse barrier (max energy - ep energy)
+            'energy_range': max of energies - min of energies
         """
+        if not barrier_type or barrier_type not in ["barrier", "energy_range"]:
+            raise ValueError(
+                f"Invalid barrier_type: {barrier_type}. Specify 'barrier' or 'energy_range'."
+            )
+
         energy_struct_info = MigrationGraphDoc._get_energy_struct_info(npr)
         mg_new = copy.deepcopy(mg)
 
@@ -463,7 +482,7 @@ class MigrationGraphDoc(EmmetBaseModel):
                 if state == TaskState.FAILED:
                     failed_neb_uhops.append(k)
                 cost, hop_key = (
-                    v["energy_struct_info"]["barrier"],
+                    v["energy_struct_info"][barrier_type],
                     v["energy_struct_info"]["hop_key"],
                 )
             mg.add_data_to_similar_edges(
@@ -506,9 +525,10 @@ class MigrationGraphDoc(EmmetBaseModel):
             energy_struct_info[hop_key] = {
                 "hop_key": hop_key,
                 "barrier": max(data.forward_barrier, data.reverse_barrier),
+                "energy_range": data.barrier_energy_range,
                 "energies": data.energies,
                 "state": data.state,
-                # "calc_metadata": data.metadata,
+                "calc_fail_info": data.failure_reasons,
                 "input_endpoints": [data.initial_images[0], data.initial_images[-1]],
                 "output_structs": data.images,
             }
