@@ -203,7 +203,7 @@ class MigrationGraphDoc(EmmetBaseModel):
         the paths_summary and migration_graph_w_cost fields with transition state data from
         NebPathwayResult.
         """
-        mgd_w_cost = mgd.model_copy(deep=True)
+        mgd_w_cost = copy.deepcopy(mgd)
         paths_summary, mg_new = cls.get_paths_summary_with_neb_res(
             mg=mgd_w_cost.migration_graph, npr=npr, barrier_type=barrier_type
         )
@@ -436,8 +436,8 @@ class MigrationGraphDoc(EmmetBaseModel):
 
         Parameters
         ----------
-        mgd: MigrationGraphDoc
-            The doc to be matched and get paths from
+        mgd: MigrationGraph
+            The MigrationGraph to be matched and get paths from
         npr: NebPathwayResult
             The doc used to get transition state calc info
         barrier_type: str
@@ -485,7 +485,7 @@ class MigrationGraphDoc(EmmetBaseModel):
                     v["energy_struct_info"][barrier_type],
                     v["energy_struct_info"]["hop_key"],
                 )
-            mg.add_data_to_similar_edges(
+            mg_new.add_data_to_similar_edges(
                 target_label=v["hop_label"],
                 data={"cost": cost, "hop_key": hop_key, "match_state": state},
             )
@@ -498,7 +498,7 @@ class MigrationGraphDoc(EmmetBaseModel):
             f"is in the FAILED state: {failed_neb_uhops}"
         )
 
-        paths = list(mg.get_path())
+        paths = list(mg_new.get_path())
         paths_summary = {}
         for one_path in paths:
             path_summary = []
