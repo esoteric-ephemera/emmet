@@ -443,7 +443,7 @@ class MigrationGraphDoc(EmmetBaseModel):
                     data_array=info,
                     key="energy_struct_info",
                 )
-            except RuntimeError as e:
+            except (RuntimeError, ValueError) as e:
                 logging.warning(f"{e} occured to during matching")
 
         unmatched_uhops = []
