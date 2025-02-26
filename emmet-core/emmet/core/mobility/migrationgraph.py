@@ -194,7 +194,8 @@ class MigrationGraphDoc(EmmetBaseModel):
                     conversion_matrix=sc_mat,
                     inserted_ion_coords=coords_list,
                     insert_coords_combo=combo,
-                    sc_gen_schema=sc_gen_schema**kwargs,
+                    sc_gen_schema=sc_gen_schema,
+                    **kwargs,
                 )
 
             else:
