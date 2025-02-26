@@ -186,6 +186,8 @@ class NebResult(BaseModel):
         None, description="List of string metadata about the calculation."
     )
 
+    identifier: str | None = Field(None, description="Identifier for the calculation.")
+
     @model_validator(mode="after")
     def set_barriers(self) -> Self:
         """Perform analysis on barrier if needed."""
@@ -313,6 +315,10 @@ class NebTaskDoc(NebResult):
                 *intermed_structs,
                 ep_structures[1],
             ]
+
+    @property
+    def num_images(self) -> int:
+        return len(self.image_structures)
 
     @classmethod
     def from_directory(
@@ -495,6 +501,8 @@ class NebPathwayResult(BaseModel):  # type: ignore[call-arg]
         None, description="Dict of the reverse barriers computed here."
     )
 
+    identifier: str | None = Field(None, description="Identifier for the calculation.")
+
     @model_validator(mode="after")
     def set_barriers(self) -> Self:
         """Set barriers if needed."""
@@ -519,9 +527,8 @@ class NebPathwayResult(BaseModel):  # type: ignore[call-arg]
         }
 
     @property
-    def barrier_ranges(self) -> dict[str,float | None]:
+    def barrier_ranges(self) -> dict[str, float | None]:
         """Retrieve the max minus min computed energy along each hop."""
         return {
-            idx : neb_calc.barrier_energy_range
-            for idx, neb_calc in self.hops.items()
+            idx: neb_calc.barrier_energy_range for idx, neb_calc in self.hops.items()
         }
