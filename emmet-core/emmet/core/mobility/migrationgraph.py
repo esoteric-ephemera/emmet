@@ -15,7 +15,10 @@ from pymatgen.analysis.diffusion.utils.edge_data_from_sc import add_edge_data_fr
 
 try:
     from pymatgen.analysis.diffusion.neb.full_path_mapper import MigrationGraph
-    from pymatgen.analysis.diffusion.utils.supercells import get_sc_fromstruct
+    from pymatgen.analysis.diffusion.utils.supercells import (
+        get_sc_fromstruct,
+        get_start_end_structures,
+    )
 except ImportError:
     raise ImportError("Install pymatgen-analysis-diffusion to use MigrationGraphDoc")
 
@@ -72,6 +75,12 @@ class MigrationGraphDoc(EmmetBaseModel):
         description="Flag indicating whether this document has populated the supercell fields",
     )
 
+    sc_gen_schema: Optional[str] = Field(
+        None,
+        description="The schema used to generate supercell fields. "
+        "hops_only: contains only endpoints for sc hops; complete: contains all transformed uc sites.",
+    )
+
     min_length_sc: Optional[float] = Field(
         None,
         description="The minimum length used to generate supercell using pymatgen.",
@@ -122,6 +131,7 @@ class MigrationGraphDoc(EmmetBaseModel):
         working_ion_entry: Union[ComputedEntry, ComputedStructureEntry],
         hop_cutoff: float,
         populate_sc_fields: bool = True,
+        sc_gen_schema: str = "complete",
         ltol: float = 0.2,
         stol: float = 0.3,
         angle_tol: float = 5,
@@ -171,6 +181,7 @@ class MigrationGraphDoc(EmmetBaseModel):
                     min_length_sc=kwargs["min_length_sc"],
                     minmax_num_atoms=kwargs["minmax_num_atoms"],
                     sm=sm,
+                    sc_gen_schema=sc_gen_schema,
                 )
 
                 return cls(
@@ -183,7 +194,7 @@ class MigrationGraphDoc(EmmetBaseModel):
                     conversion_matrix=sc_mat,
                     inserted_ion_coords=coords_list,
                     insert_coords_combo=combo,
-                    **kwargs,
+                    sc_gen_schema=sc_gen_schema**kwargs,
                 )
 
             else:
@@ -217,7 +228,13 @@ class MigrationGraphDoc(EmmetBaseModel):
         min_length_sc: float,
         minmax_num_atoms: Tuple[int, int],
         sm: StructureMatcher,
+        sc_gen_schema: str = "hops_only",
     ):
+        if sc_gen_schema not in ["hops_only", "complete"]:
+            raise ValueError(
+                f"Invalid sc_gen_schema: {sc_gen_schema}. Specify 'hops_only' or 'complete'."
+            )
+
         min_length_sc = min_length_sc
         minmax_num_atoms = minmax_num_atoms
 
@@ -232,12 +249,57 @@ class MigrationGraphDoc(EmmetBaseModel):
         host_sc = mg.host_structure * sc_mat
         working_ion = mg.only_sites[0].species_string
 
-        coords_list = MigrationGraphDoc.ordered_sc_site_list(mg.only_sites, sc_mat)
-        combo, coords_list = MigrationGraphDoc.get_hop_sc_combo(
-            mg.unique_hops, sc_mat, sm, host_sc, working_ion, coords_list
-        )
+        if sc_gen_schema == "hops_only":
+            coords_list, combo = MigrationGraphDoc.get_sc_info_hops_only(mg, sc_mat)
+
+        if sc_gen_schema == "complete":
+            coords_list = MigrationGraphDoc.ordered_sc_site_list(mg.only_sites, sc_mat)
+            combo, coords_list = MigrationGraphDoc.get_hop_sc_combo(
+                mg.unique_hops, sc_mat, sm, host_sc, working_ion, coords_list
+            )
 
         return host_sc, sc_mat, min_length_sc, minmax_num_atoms, coords_list, combo
+
+    @staticmethod
+    def get_sc_info_hops_only(mg: MigrationGraph, sc_mat: list[list[int | float]]):
+        coords_list = []
+        combo = []
+        base_struct = mg.host_structure
+
+        for one_hop in mg.unique_hops.values():
+            migration_hop = one_hop["hop"]
+            isite, iindex = migration_hop.isite, one_hop["iindex"]
+            esite, eindex = migration_hop.esite, one_hop["eindex"]
+            start_structure, end_structure, _ = get_start_end_structures(
+                isite=isite,
+                esite=esite,
+                base_struct=base_struct,
+                sc_mat=sc_mat,
+                vac_mode=False,
+            )
+
+            sc_ini_info = {
+                "uc_site_type": iindex,
+                "site_frac_coords": tuple(start_structure[0].frac_coords),
+            }
+            if sc_ini_info not in coords_list:
+                coords_list.append(sc_ini_info)
+            combo_ini = coords_list.index(sc_ini_info)
+
+            sc_fin_info = {
+                "uc_site_type": eindex,
+                "site_frac_coords": tuple(end_structure[0].frac_coords),
+            }
+            if sc_fin_info not in coords_list:
+                coords_list.append(sc_fin_info)
+            combo_fin = coords_list.index(sc_fin_info)
+
+            combo.append(f"{combo_ini}+{combo_fin}")
+
+        for coords in coords_list:
+            coords["site_frac_coords"] = list(coords["site_frac_coords"])
+
+        return coords_list, combo
 
     @staticmethod
     def ordered_sc_site_list(uc_sites_only: Structure, sc_mat: List[List[int]]):
