@@ -229,7 +229,7 @@ class MigrationGraphDoc(EmmetBaseModel):
         min_length_sc: float,
         minmax_num_atoms: Tuple[int, int],
         sm: StructureMatcher,
-        sc_gen_schema: str = "hops_only",
+        sc_gen_schema: str,
     ):
         if sc_gen_schema not in ["hops_only", "complete"]:
             raise ValueError(
