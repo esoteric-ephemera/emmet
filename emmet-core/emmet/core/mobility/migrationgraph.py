@@ -555,11 +555,12 @@ class MigrationGraphDoc(EmmetBaseModel):
                     v["energy_struct_info"]["hop_key"],
                 )
                 # for short hops with low barrier, set cost to 0
-                cutoff = 2 * MigrationGraphDoc._get_wi_ionic_radius(mg_new)
-                if zero_short_hop_cost and MigrationGraphDoc._check_short_hop(
-                    v, current_cost=cost, length_cutoff=cutoff
-                ):
-                    cost = 0
+                if zero_short_hop_cost:
+                    cutoff = 2 * MigrationGraphDoc._get_wi_ionic_radius(mg_new)
+                    if MigrationGraphDoc._check_short_hop(
+                        v, current_cost=cost, length_cutoff=cutoff
+                    ):
+                        cost = 0
             mg_new.add_data_to_similar_edges(
                 target_label=v["hop_label"],
                 data={"cost": cost, "hop_key": hop_key, "match_state": state},
