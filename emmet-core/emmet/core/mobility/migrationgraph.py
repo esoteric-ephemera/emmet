@@ -208,12 +208,15 @@ class MigrationGraphDoc(EmmetBaseModel):
         cls,
         mgd: "MigrationGraphDoc",
         npr: NebPathwayResult,
-        barrier_type: str = "barrier",
+        barrier_type: str,
     ) -> "MigrationGraphDoc":
         """
         This class method takes an existing MigrationGraphDoc and augments it by populating
         the paths_summary and migration_graph_w_cost fields with transition state data from
         NebPathwayResult.
+
+        barrier_type can be set to 'barrier' or 'energy_range'.
+        See docstring of get_paths_summary_with_neb_res for detail.
         """
         mgd_w_cost = copy.deepcopy(mgd)
         paths_summary, mg_new = cls.get_paths_summary_with_neb_res(
@@ -491,7 +494,10 @@ class MigrationGraphDoc(EmmetBaseModel):
 
     @staticmethod
     def get_paths_summary_with_neb_res(
-        mg: MigrationGraph, npr: NebPathwayResult, barrier_type: str
+        mg: MigrationGraph,
+        npr: NebPathwayResult,
+        barrier_type: str,
+        zero_short_hop_cost: bool = True,
     ) -> Tuple[Dict[int, List], MigrationGraph]:
         """
         This is a post-processing function that matches the results of transition state cals (NEB or ApproxNEB)
@@ -548,6 +554,12 @@ class MigrationGraphDoc(EmmetBaseModel):
                     v["energy_struct_info"][barrier_type],
                     v["energy_struct_info"]["hop_key"],
                 )
+                # for short hops with low barrier, set cost to 0
+                cutoff = 2 * MigrationGraphDoc._get_wi_ionic_radius(mg_new)
+                if zero_short_hop_cost and MigrationGraphDoc._check_short_hop(
+                    v, current_cost=cost, length_cutoff=cutoff
+                ):
+                    cost = 0
             mg_new.add_data_to_similar_edges(
                 target_label=v["hop_label"],
                 data={"cost": cost, "hop_key": hop_key, "match_state": state},
@@ -596,3 +608,23 @@ class MigrationGraphDoc(EmmetBaseModel):
                 "output_structs": data.images,
             }
         return energy_struct_info
+
+    @staticmethod
+    def _get_wi_ionic_radius(mg: MigrationGraph):
+        wi = mg.only_sites[0].specie
+        wi_oxi_state_guess = mg.structure.composition.oxi_state_guesses()[0][wi.name]
+        if wi_oxi_state_guess in wi.ionic_radii:
+            return wi.ionic_radii[wi_oxi_state_guess]
+        return wi.ionic_radii[min(wi.ionic_radii)]
+
+    @staticmethod
+    def _check_short_hop(
+        unique_hop: dict,
+        current_cost: float,
+        length_cutoff: float,
+        barrier_cutoff: float = 0.02,
+    ):
+        hop_length = unique_hop["hop_distance"]
+        if hop_length < length_cutoff and current_cost < barrier_cutoff:
+            return True
+        return False
