@@ -514,9 +514,9 @@ class MigrationGraphDoc(EmmetBaseModel):
             'barrier': max of forward & reverse barrier (max energy - ep energy)
             'energy_range': max of energies - min of energies
         """
-        if not barrier_type or barrier_type not in ["barrier", "energy_range"]:
+        if not barrier_type or barrier_type not in ["max_barrier", "energy_range"]:
             raise ValueError(
-                f"Invalid barrier_type: {barrier_type}. Specify 'barrier' or 'energy_range'."
+                f"Invalid barrier_type: {barrier_type}. Specify 'max_barrier' or 'energy_range'."
             )
 
         energy_struct_info = MigrationGraphDoc._get_energy_struct_info(npr)
@@ -600,7 +600,7 @@ class MigrationGraphDoc(EmmetBaseModel):
         for hop_key, data in npr.hops.items():
             energy_struct_info[hop_key] = {
                 "hop_key": hop_key,
-                "barrier": max(data.forward_barrier, data.reverse_barrier),
+                "max_barrier": npr.max_barriers[hop_key],
                 "energy_range": data.barrier_energy_range,
                 "energies": data.energies,
                 "state": data.state,
