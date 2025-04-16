@@ -81,7 +81,7 @@ def test_generate_sc_fields(mg_for_sc_fields):
         min_max_num_atoms,
         coords_dict,
         combo,
-    ) = MigrationGraphDoc.generate_sc_fields(mg_for_sc_fields, 7, (80, 160), sm)
+    ) = MigrationGraphDoc.generate_sc_fields(mg_for_sc_fields, 7, (80, 160), sm, "complete")
     sc_mat_inv = np.linalg.inv(sc_mat)
     expected_sc_list = []
 
