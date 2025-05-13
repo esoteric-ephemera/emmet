@@ -313,13 +313,15 @@ class Trajectory(BaseModel):
         return pa_table
 
     @classmethod
-    def from_parquet(cls, file_name: str | Path, identifier: str | None = None) -> Self:
+    def from_arrow(
+        cls, data: ArrowTable | str | Path, identifier: str | None = None
+    ) -> Self:
         """
-        Create a trajectory from a parquet file.
+        Create a trajectory from a pyarrow file.
 
         Parameters
         -----------
-        file_name : str or .Path
+        data : pyarrow.Table, str, .Path
             The parquet file to read from
         identifier : str or None (default)
             If not None, the identifier of the trajectory to return
@@ -329,7 +331,11 @@ class Trajectory(BaseModel):
         -----------
         Trajectory
         """
-        pa_table = pa_pq.read_table(file_name)
+        if isinstance(data, str | Path):
+            pa_table = pa_pq.read_table(data)
+        else:
+            pa_table = data
+
         if identifier:
             pa_table = pa_table.filter(
                 pa.compute.field("identifier") == identifier,
