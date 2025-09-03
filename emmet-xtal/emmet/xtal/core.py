@@ -49,7 +49,7 @@ class AtomProperties(BaseModel):
     @model_serializer
     def unset_none(self):
         model_deser = {}
-        for k in ("magmom", "selective_dynamics", "velocity"):
+        for k in ("magmom", "charge", "selective_dynamics", "velocity"):
             if (v := getattr(self, k)) is not None:
                 model_deser[k] = v
         return model_deser
@@ -183,17 +183,35 @@ class Composition(ShapeShifter):
             {atom._to_pymatgen(): occu for atom, occu in self.atoms.items()}
         )
 
+    @property
+    def mass_amu(self) -> float:
+        return sum(stoich * atom.mass for atom, stoich in self.atoms.items())
+
     @classmethod
     def from_list(
-        cls, atoms: list[Atom | dict[Atom, float] | Composition]
+        cls, atoms: list[Atom | int | str | dict[Atom | int | str, float] | Composition]
     ) -> Composition:
+
         comp = defaultdict(float)
+
+        def from_symb(
+            atom: int | Atom,
+            occu: float = 1.0,
+        ) -> None:
+            if isinstance(atom, int):
+                symb = Atom.from_atomic_number(atom)
+            elif isinstance(atom, str):
+                symb = Atom(atom)
+            else:
+                symb = atom
+            comp[symb] += occu
+
         for atom in atoms:
-            if isinstance(atom, Atom):
-                comp[str(atom)] += 1
-            elif isinstance(atom, dict | Composition):
+            if isinstance(atom, dict | Composition):
                 for sub_atom, occu in atom.items():
-                    comp[str(sub_atom)] += occu
+                    from_symb(sub_atom, occu=occu)
+            elif isinstance(atom, int | Atom):
+                from_symb(atom)
             else:
                 raise ValueError("Cannot parse provided list of atoms.")
         return cls(atoms=comp)
@@ -214,7 +232,10 @@ class Composition(ShapeShifter):
     @staticmethod
     def _get_formula(comp: dict[str, float | int]) -> str:
         return " ".join(
-            [f"{atom}{comp[atom]}" for atom in sorted(comp, key=lambda k: k.Z)]
+            [
+                f"{atom}{comp[atom]}"
+                for atom in sorted(comp, key=lambda k: k.atomic_number)
+            ]
         )
 
     @property
@@ -253,17 +274,17 @@ def set_coords(
 class NonPeriodicConfig(ShapeShifter):
     """Represent a set of atoms and their coordinates in space."""
 
-    atoms: list[Atom]
+    atomic_numbers: tuple[int, ...]
     coords: list_vector_3_t
-    atom_properties: list[AtomProperties] | None = None
+    atom_properties: tuple[AtomProperties, ...] | None = None
 
     @property
     def num_sites(self) -> int:
-        return len(self.atoms)
+        return len(self.atomic_numbers)
 
     @cached_property
     def composition(self) -> Composition:
-        return Composition.from_list(self.atoms)
+        return Composition.from_list(self.atomic_numbers)
 
     @property
     def formula(self) -> str:
@@ -277,11 +298,11 @@ class NonPeriodicConfig(ShapeShifter):
         masses = np.array(
             [
                 (
-                    sum(occu * atom.mass for atom, occu in site.items())
+                    Composition(atoms=site).mass_amu
                     if isinstance(site, dict | Composition)
-                    else site.mass
+                    else Atom.from_atomic_number(site).mass_amu
                 )
-                for site in self.atoms
+                for site in self.atomic_numbers
             ]
         )
         return np.einsum("i,ij->j", masses, np.array(self.coords)) / masses.sum()
@@ -290,14 +311,17 @@ class NonPeriodicConfig(ShapeShifter):
     def _from_pymatgen(cls, atoms: PmgStructure | PmgMolecule, **kwargs) -> Self:
 
         config = {
-            "atoms": [],
+            "atomic_numbers": [],
             "coords": [],
             "atom_properties": [],
         }
         for site in atoms:
-            config["atoms"].append(Atom._from_pymatgen(site.species_string))
+            atom = Atom._from_pymatgen(site.species_string)
+            config["atomic_numbers"].append(atom.atomic_number)
             config["coords"].append(site.coords)
-            config["atom_properties"].append(AtomProperties(**site.properties))
+            config["atom_properties"].append(
+                AtomProperties(**site.properties, charge=atom.charge)
+            )
 
         if not any(config["atom_properties"]):
             config["atom_properties"] = None
@@ -308,11 +332,11 @@ class NonPeriodicConfig(ShapeShifter):
         """Aggregate atoms on each site into a list of dicts."""
         return [
             (
-                {str(k): v for k, v in atom.items()}
+                {str(Atom.from_atomic_number(k)): v for k, v in atom.items()}
                 if isinstance(atom, dict | Composition)
-                else {str(atom): 1.0}
+                else {str(Atom.from_atomic_number(atom)): 1.0}
             )
-            for atom in self.atoms
+            for atom in self.atomic_numbers
         ]
 
     def _aggregate_site_properties(self) -> dict[str, list[Any]]:
@@ -351,7 +375,7 @@ class NonPeriodicConfig(ShapeShifter):
         ignore = set(ignore or [])
         allowed_props = set(Atom.model_fields).difference(ignore)
         groups = defaultdict(list)
-        for idx, c in enumerate(self.atoms):
+        for idx, c in enumerate(self.atomic_numbers):
             if ignore:
                 if isinstance(c, dict | Composition):
                     new_c = Composition(
@@ -369,6 +393,42 @@ class NonPeriodicConfig(ShapeShifter):
             groups[new_c].append(self.coords[idx])
         return {k: np.array(v) for k, v in groups.items()}
 
+    def _to_ase(self, **kwargs) -> AseAtoms:
+
+        props = {
+            k: [getattr(prop, k) for prop in self.atom_properties]
+            for k in (
+                "magmom",
+                "charge",
+                "velocity",
+            )
+        }
+        for k, v in props.items():
+            if not all(x is not None for x in v):
+                props[k] = None
+
+        remap = {
+            "magmom": "magmoms",
+            "charge": "charges",
+            "velocity": "velocities",
+        }
+
+        config = {
+            "positions": self.coords,
+            "numbers": self.atomic_numbers,
+            "masses": [
+                Atom.from_atomic_number(num).mass_amu for num in self.atomic_numbers
+            ],
+            **{v: props[k] for k, v in remap.items()},
+            **kwargs,
+        }
+        return AseAtoms(
+            **{
+                k: np.array(v) if isinstance(v, list | tuple) else v
+                for k, v in config.items()
+            }
+        )
+
 
 class PeriodicConfig(NonPeriodicConfig):
     """Represent a set of atoms with periodicity."""
@@ -379,7 +439,7 @@ class PeriodicConfig(NonPeriodicConfig):
     def __hash__(self) -> int:
         return hash(
             (
-                tuple(self.atoms),
+                tuple(self.atomic_numbers),
                 tuple(self.coords),
                 self.cell,
                 tuple(self.atom_properties),
@@ -387,10 +447,8 @@ class PeriodicConfig(NonPeriodicConfig):
         )
 
     @cached_property
-    def frac_coords(self) -> list_vector_3_t | None:
-        if self.cell:
-            return set_coords(self.cell, self.coords, "direct")
-        return
+    def frac_coords(self) -> list_vector_3_t:
+        return set_coords(self.cell, self.coords, "direct")
 
     @property
     def volume(self) -> float:
@@ -399,11 +457,7 @@ class PeriodicConfig(NonPeriodicConfig):
     @property
     def density(self) -> float:
         """Structure density in g/cm^3."""
-        return (
-            sum(stoich * atom.mass for atom, stoich in self.composition.items())
-            * 1e24
-            / self.cell.volume
-        )
+        return self.composition.mass * 1e24 / self.cell.volume
 
     @classmethod
     def _from_pymatgen(cls, atoms: PmgStructure) -> Self:
@@ -434,7 +488,7 @@ class PeriodicConfig(NonPeriodicConfig):
         return (
             self.cell.matrix,
             self.frac_coords,
-            [atom.Z for atom in self.atoms],
+            self.atomic_numbers,
         )
 
     @classmethod
@@ -444,11 +498,14 @@ class PeriodicConfig(NonPeriodicConfig):
         cell, frac_coords, atomic_numbers = spglib_rep
         cell = CellVector3D(matrix=cell)
         return cls(
-            atoms=[Atom.from_atomic_number(z) for z in atomic_numbers],
+            atoms=atomic_numbers,
             cell=cell,
             coords=set_coords(cell, frac_coords, to="cartesian"),
             pbc=(True, True, True),
         )
+
+    def _to_ase(self, **kwargs):
+        return super()._to_ase(cell=self.cell.matrix, pbc=self.pbc, **kwargs)
 
     def primitive(
         self, symprec: float = SETTINGS.SYMPREC, angprec: float = SETTINGS.ANGPREC
@@ -474,7 +531,7 @@ class PeriodicConfig(NonPeriodicConfig):
         sg_info = spglib.get_spacegroup(
             self._to_spglib, symprec=symprec, angle_tolerance=angprec
         )
-        return tuple(re.match("(.*) \((.*)\)", sg_info).groups())
+        return tuple(re.match(r"(.*) \((.*)\)", sg_info).groups())
 
     def get_space_group_symbol(self):
         return self.get_space_group_info()[0]
@@ -492,7 +549,7 @@ class PeriodicConfig(NonPeriodicConfig):
         new_cart_coords = set_coords(new_cell, self.frac_coords, to="cartesian")
 
         return type(self)(
-            atoms=self.atoms,
+            atomic_numbers=self.atomic_numbers,
             coords=new_cart_coords,
             cell=new_cell,
             pbc=self.pbc,
@@ -501,7 +558,7 @@ class PeriodicConfig(NonPeriodicConfig):
 
     def standardized(self) -> PeriodicConfig:
 
-        site_order = np.argsort([atom.Z for atom in self.atoms])
+        site_order = np.argsort(self.atomic_numbers)
 
         new_cell = self.cell.upper_triangular
         new_direct_coords = np.array(
@@ -513,7 +570,7 @@ class PeriodicConfig(NonPeriodicConfig):
         new_cart_coords = set_coords(new_cell, new_direct_coords, to="cartesian")
 
         return PeriodicConfig(
-            atoms=[self.atoms[idx] for idx in site_order],
+            atomic_numbers=self.atomic_numbers,
             coords=new_cart_coords,
             cell=new_cell,
             pbc=self.pbc,
@@ -528,7 +585,7 @@ class PeriodicConfig(NonPeriodicConfig):
 class DisorderedConfig(PeriodicConfig):
     """Represent a configurationally-disordered set of atoms."""
 
-    atoms: list[Composition]
+    atomic_numbers: tuple[dict[int, float], ...]
 
     @model_validator(mode="before")
     @classmethod
@@ -542,23 +599,21 @@ class DisorderedConfig(PeriodicConfig):
     def _from_pymatgen(cls, atoms: PmgStructure, site_tol: float | None = 1.0e-2):
 
         config = {
-            "atoms": [],
+            "atomic_numbers": [],
             "coords": [],
             "cell": CellVector3D(matrix=atoms.lattice.matrix),
             "pbc": (True,) * 3,
-            "frac_coords": [],
             "atom_properties": [],
         }
         for site in atoms:
             site_comp = Composition._from_pymatgen(site.species)
-            config["atoms"].append(site_comp)
+            config["atomic_numbers"].append({k.Z: v for k, v in site_comp.items()})
             if site_tol and abs(sum(site_comp.values()) - 1.0) > site_tol:
                 raise ValueError(
                     f"Fractional site occupancy {sum(site_comp.values())} "
                     f"exceeds {site_tol} tolerance."
                 )
             config["coords"].append(site.coords)
-            config["frac_coords"].append(site.frac_coords)
             config["atom_properties"].append(AtomProperties(**site.properties))
         if not any(config["atom_properties"]):
             config["atom_properties"] = None
