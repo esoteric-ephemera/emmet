@@ -45,11 +45,14 @@ readme = "README.md"
 requires-python = '>=3.11'
 
 [project.optional-dependencies]
-pmg = [
+pymatgen = [
   "pymatgen"
 ]
 ase = [
   "ase"
+]
+units = [
+  "pint"
 ]
 tests = [
   "pre-commit>=2.12.1",
@@ -63,6 +66,7 @@ tests = [
   "types-setuptools",
   "types-requests",
 ]
+all = ["emmet-xtal[ase,pymatgen,pint,tests]"]
 
 [tool.setuptools.dynamic]
 readme = { file = ["README.md"] }

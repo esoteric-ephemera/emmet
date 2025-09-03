@@ -157,6 +157,16 @@ class AtomSymbol(Enum):
     Ts = "Tennessine"
     Og = "Oganesson"
 
+    @classmethod
+    def from_atomic_number(cls, Z: int, A: int | None = None):
+        """Get the atom symbol associated with a proton number."""
+        mask = ATOM_DATA.Z == Z
+        if A:
+            mask = mask & (ATOM_DATA.A == A)
+        else:
+            mask = mask & (ATOM_DATA.primary_isotope)
+        return AtomSymbol[ATOM_DATA[mask].name.squeeze()]
+
 
 NAMED_ISOTOPES = [
     "D",
@@ -165,7 +175,7 @@ NAMED_ISOTOPES = [
 
 
 def get_value_and_uncertainty(val_str: str) -> tuple[float, float | None]:
-    reg = re.match("([0-9]+)*(\.[0-9]+)?(\([0-9]+\))?", val_str)
+    reg = re.match(r"([0-9]+)*(\.[0-9]+)?(\([0-9]+\))?", val_str)
     if not reg or not any(reg.groups()):
         raise ValueError(f"Malformed input string {val_str}.")
     characteristic, mantissa, uncertainty = reg.groups()
@@ -287,20 +297,21 @@ def fetch_isotope_data(
 class Atom(ShapeShifter):
     """Basic representation of an atom."""
 
-    name: str
+    symbol: AtomSymbol
     charge: float | None = None
     spin: float | None = None
-    _long_name: str | None = PrivateAttr(None)
     _mass_amu: float | None = PrivateAttr(None)
 
     def __hash__(self) -> int:
         """Hash based on properties."""
-        return hash((self.Z, self.charge, self.spin, self.long_name, self.mass_amu))
+        return hash(
+            (self.atomic_number, self.charge, self.spin, self.long_name, self.mass_amu)
+        )
 
     @classmethod
     def from_str(cls, rep: str, **kwargs) -> Self:
         """Parse an Atom from a string, including possible oxieation state."""
-        _parsed = re.match("([A-Z][a-z]?)([0-9.0-9]+)?([+-])?", rep)
+        _parsed = re.match(r"([A-Z][a-z]?)([0-9.0-9]+)?([+-])?", rep)
         if not _parsed:
             raise ValueError(f"Unknown element symbol {rep}")
         parsed = _parsed.groups()
@@ -327,25 +338,17 @@ class Atom(ShapeShifter):
 
         obj = cls(**config)
 
-        for k in ("long_name", "mass_amu"):
+        for k in "mass_amu":
             if v := kwargs.pop(k, None):
                 setattr(obj, f"_{k}", v)
 
         return obj
 
     @classmethod
-    def from_atomic_number(cls, z: int, **kwargs):
+    def from_atomic_number(cls, Z: int, **kwargs):
         """Create an Atom from the proton number."""
-        mask = ATOM_DATA.Z == z
-        for k, v in kwargs.items():
-            if ATOM_DATA.get(k):
-                mask = mask & ATOM_DATA[ATOM_DATA[k] == v]
-
-        if len(kwargs) == 0 or len(ATOM_DATA[mask]) > 0:
-            mask = mask & ATOM_DATA.primary_isotope
-
         return cls.from_str(
-            ATOM_DATA[mask].name.squeeze(),
+            AtomSymbol.from_atomic_number(Z, A=kwargs.pop("A", None)),
             **kwargs,
         )
 
@@ -370,7 +373,7 @@ class Atom(ShapeShifter):
         return PmgElement(self.name)
 
     @property
-    def Z(self) -> int:
+    def atomic_number(self) -> int:
         """Return the number of protons in the atom."""
         return ATOM_DATA[ATOM_DATA.name == self.name].Z.squeeze()
 
@@ -382,11 +385,14 @@ class Atom(ShapeShifter):
         return self._mass_amu
 
     @property
+    def name(self) -> str:
+        """The symbol of this atom, e.g., H."""
+        return self.symbol.name
+
+    @property
     def long_name(self) -> str:
         """Return the full name of the atom, e.g., Hydrogen."""
-        if not self._long_name:
-            self._long_name = AtomSymbol[self.name]
-        return self._long_name
+        return self.symbol.name
 
     @property
     def mass(self) -> float:

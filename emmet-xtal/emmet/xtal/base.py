@@ -49,6 +49,14 @@ class XtalSettings(BaseSettings):
         description="The uncertainty in angles (units of degrees) used in symmetry determination.",
     )
 
+    LTOL: float = Field(
+        default=0.5,
+        description=(
+            "The maxmimum RMSD in two sets of coordinates for which "
+            "two non-periodic configurations are said to be the same."
+        ),
+    )
+
 
 SETTINGS = XtalSettings()
 
