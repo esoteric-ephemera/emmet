@@ -8,14 +8,18 @@ from scipy.spatial.transform import Rotation
 import numpy as np
 from typing import TYPE_CHECKING
 
+import amd
+
 from emmet.xtal import SETTINGS
-from emmet.xtal.core import NonPeriodicConfig
+from emmet.xtal.core import NonPeriodicConfig, PeriodicConfig
+
 
 if TYPE_CHECKING:
     from collections.abc import Generator
 
 
 class NonPeriodicMatcher(BaseModel):
+    """Match non-periodic collections of atoms, e.g., atoms, molecules and clusters."""
 
     tolerance: float = Field(
         SETTINGS.LTOL,
@@ -97,3 +101,36 @@ class NonPeriodicMatcher(BaseModel):
             if rmsd < self.tol:
                 return True
         return False
+
+
+class PeriodicMatcher(BaseModel):
+    """Match periodic configurations of atoms."""
+
+    k_per_max_num_sites : float = Field(125, description="The k parameter in the average minimum distance model.")
+    tolerance : float = Field(0.8, description="The distance tolerance for saying that two periodic configurations differ.")
+
+    @staticmethod
+    def _periodic_config_to_periodic_set(p : PeriodicConfig) -> amd.PeriodicSet:
+        """Convert a PeriodicConfig to an amd.PeriodicSet."""
+        return amd.PeriodicSet(
+            motif = list(p.coords),
+            cell = list(p.cell),
+            name = "periodic_config",
+            types = p.atomic_numbers,
+        )
+
+    def get_avg_min_dist(self, p0 : PeriodicConfig, p1 : PeriodicConfig) -> float:
+        """Get the average minimum distance between two PeriodicConfig."""
+        k = self.k_per_max_num_sites*max(p.num_sites for p in (p0,p1))
+        return amd.EMD(
+            *[
+                amd.PDD(
+                    self._periodic_config_to_periodic_set(ps), k
+                )
+                for ps in (pset1,pset2)
+            ]
+        )
+
+    def fit(self, p0 : PeriodicConfig, p1 : PeriodicConfig) -> bool:
+        """Check if the average minimum distance between two PeriodicConfig is below a tolerance."""
+        return self.get_avg_min_dist(p0,p1) < self.tolerance
