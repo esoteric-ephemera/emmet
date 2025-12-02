@@ -59,6 +59,7 @@ tests = [
   "pre-commit>=2.12.1",
   "pytest>=8.3.5",
   "pytest-cov>=6.0.0",
+  "pytest-xdist",
   "pycodestyle",
   "pydocstyle",
   "flake8",
@@ -67,7 +68,7 @@ tests = [
   "types-setuptools",
   "types-requests",
 ]
-all = ["emmet-xtal[ase,pymatgen,pint,tests]"]
+all = ["emmet-xtal[ase,pymatgen,units,tests]"]
 
 [tool.setuptools.dynamic]
 readme = { file = ["README.md"] }
