@@ -11,14 +11,14 @@ from typing import TYPE_CHECKING
 import amd
 
 from emmet.xtal import SETTINGS
-from emmet.xtal.core import NonPeriodicConfig, PeriodicConfig
+from emmet.xtal.core import Molecule, Material
 
 
 if TYPE_CHECKING:
     from collections.abc import Generator
 
 
-class NonPeriodicMatcher(BaseModel):
+class MoleculeMatcher(BaseModel):
     """Match non-periodic collections of atoms, e.g., atoms, molecules and clusters."""
 
     tolerance: float = Field(
@@ -47,7 +47,7 @@ class NonPeriodicMatcher(BaseModel):
         )
         return translation, rotation, rssd / v0.shape[0] ** (0.5)
 
-    def reorder_sites(self, m: NonPeriodicConfig):
+    def reorder_sites(self, m: Molecule):
         centroid = self.centroid(m.coords)
         sorted_idx = sorted(
             range(m.num_sites),
@@ -59,14 +59,14 @@ class NonPeriodicMatcher(BaseModel):
         return self.permute_molecule(m, sorted_idx)
 
     @staticmethod
-    def permute(m: NonPeriodicConfig, permutation: list[int]):
-        return NonPeriodicConfig(
+    def permute(m: Molecule, permutation: list[int]):
+        return Molecule(
             [m.atomic_numbers[idx] for idx in permutation],
             [m.coords[idx] for idx in permutation],
         )
 
     def generate_permutations(
-        self, m: NonPeriodicConfig
+        self, m: Molecule
     ) -> Generator[tuple[tuple[int, ...], ...]]:
         sorted_m = self.reorder_sites(m)
         ranges: dict[int, tuple[int, int] | None] = {
@@ -86,7 +86,7 @@ class NonPeriodicMatcher(BaseModel):
 
         return product(*[permutations(range(*ranges[ele])) for ele in sorted_ele])  # type: ignore[misc]
 
-    def fit(self, m0: NonPeriodicConfig, m1: NonPeriodicConfig):
+    def fit(self, m0: Molecule, m1: Molecule):
         if m0.formula != m1.formula:
             return False
 
@@ -103,15 +103,15 @@ class NonPeriodicMatcher(BaseModel):
         return False
 
 
-class PeriodicMatcher(BaseModel):
+class MaterialMatcher(BaseModel):
     """Match periodic configurations of atoms."""
 
     k_per_max_num_sites : float = Field(125, description="The k parameter in the average minimum distance model.")
     tolerance : float = Field(0.8, description="The distance tolerance for saying that two periodic configurations differ.")
 
     @staticmethod
-    def _periodic_config_to_periodic_set(p : PeriodicConfig) -> amd.PeriodicSet:
-        """Convert a PeriodicConfig to an amd.PeriodicSet."""
+    def _periodic_config_to_periodic_set(p : Material) -> amd.PeriodicSet:
+        """Convert a Material to an amd.PeriodicSet."""
         return amd.PeriodicSet(
             motif = list(p.coords),
             cell = list(p.cell),
@@ -119,8 +119,8 @@ class PeriodicMatcher(BaseModel):
             types = p.atomic_numbers,
         )
 
-    def get_avg_min_dist(self, p0 : PeriodicConfig, p1 : PeriodicConfig) -> float:
-        """Get the average minimum distance between two PeriodicConfig."""
+    def get_avg_min_dist(self, p0 : Material, p1 : Material) -> float:
+        """Get the average minimum distance between two Material."""
         k = self.k_per_max_num_sites*max(p.num_sites for p in (p0,p1))
         return amd.EMD(
             *[
@@ -131,6 +131,6 @@ class PeriodicMatcher(BaseModel):
             ]
         )
 
-    def fit(self, p0 : PeriodicConfig, p1 : PeriodicConfig) -> bool:
-        """Check if the average minimum distance between two PeriodicConfig is below a tolerance."""
+    def fit(self, p0 : Material, p1 : Material) -> bool:
+        """Check if the average minimum distance between two Material is below a tolerance."""
         return self.get_avg_min_dist(p0,p1) < self.tolerance

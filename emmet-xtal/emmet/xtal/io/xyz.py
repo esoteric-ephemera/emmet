@@ -12,8 +12,8 @@ from emmet.xtal.atom import Atom
 from emmet.xtal.core import (
     AtomProperties,
     CellVector3D,
-    NonPeriodicConfig,
-    PeriodicConfig,
+    Molecule,
+    Material,
 )
 
 if TYPE_CHECKING:
@@ -136,7 +136,7 @@ class XyzParser(BaseModel):
     @staticmethod
     def _atom_config_from_xyz_dict(
         dct: dict[str, Any],
-    ) -> NonPeriodicConfig | PeriodicConfig:
+    ) -> Molecule | Material:
         natom = len(dct["species"])
         nulled = [None] * natom
 
@@ -151,14 +151,14 @@ class XyzParser(BaseModel):
         cv = None
         if (cvm := dct.get("lattice")) is not None:
             cv = CellVector3D(matrix=cvm)
-            return PeriodicConfig(
+            return Material(
                 atoms=atoms,
                 coords=dct["pos"],
                 cell=cv,
                 pbc=dct.get("pbc", None),
                 atom_properties=atom_properties,
             )
-        return NonPeriodicConfig(
+        return Molecule(
             atoms=atoms,
             coords=dct["pos"],
             atom_properties=atom_properties,
@@ -167,7 +167,7 @@ class XyzParser(BaseModel):
     def parse_xyz(
         self,
         file_name: str,
-    ) -> NonPeriodicConfig | PeriodicConfig | list[NonPeriodicConfig | PeriodicConfig]:
+    ) -> Molecule | Material | list[Molecule | Material]:
 
         parsed = _parse_xyz(
             file_name, extended=self.extended, trajectory=self.trajectory

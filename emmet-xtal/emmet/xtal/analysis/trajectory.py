@@ -12,7 +12,7 @@ from pydantic import BaseModel
 from emmet.xtal.base import Atom, AtomSymbol
 
 if TYPE_CHECKING:
-    from emmet.xtal.core import NonPeriodicConfig, PeriodicConfig
+    from emmet.xtal.core import Molecule, Material
 
 logger = logging.getLogger(__name__)
 
@@ -93,7 +93,7 @@ class TrajectoryAnalyzer:
     @classmethod
     def from_frames(
         cls,
-        configs: list[NonPeriodicConfig | PeriodicConfig],
+        configs: list[Molecule | Material],
         constant_cell: bool = False,
         unfold: bool = False,
     ):
@@ -101,9 +101,9 @@ class TrajectoryAnalyzer:
 
         Parameters
         -----------
-        traj : List of either **only** NonPeriodicConfig or of only PeriodicConfig.
+        traj : List of either **only** Molecule or of only Material.
         constant_cell : bool = False
-            For PeriodicConfig, whether the cell vectors were held constant.
+            For Material, whether the cell vectors were held constant.
         unfold : bool = False
             NOT IMPLEMENTED YET: whether to attempt to unfold the
             trajectory along PBC if a lattice is specified
@@ -116,7 +116,7 @@ class TrajectoryAnalyzer:
             )
 
         lattice = None
-        if isinstance(configs[0], PeriodicConfig):
+        if isinstance(configs[0], Material):
             if constant_cell:
                 lattice = np.array(configs[0].cell.matrix)
             else:

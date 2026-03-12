@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
+from functools import cached_property
 from pathlib import Path
 import re
 import requests
@@ -25,7 +26,7 @@ else:
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-ATOM_DATA_FILE = Path(__file__).absolute().parent / "data" / "isotope_data.json.gz"
+ATOM_DATA_FILE = Path(__file__).absolute().parent.parent / "data" / "isotope_data.json.gz"
 
 if ATOM_DATA_FILE.exists():
     ATOM_DATA = pd.read_json(ATOM_DATA_FILE)
@@ -293,6 +294,78 @@ def fetch_isotope_data(
 
     return data
 
+class AtomsMixIn:
+    
+    @cached_property
+    def _masses(self) -> np.ndarray:
+        return np.sum([Atom.from_atomic_number(z).mass for z in self.z])
+
+    @cached_property
+    def center_of_mass(self) -> float:
+        return np.einsum("i,ij->j", self._masses, self.cart_coords)/self._masses.sum()
+
+    @staticmethod
+    def _to_jsonable(obj : AtomsMixIn) -> dict:
+        dct = {
+            k : getattr(obj,k)
+            for k in getattr(obj,"__slots__",[])
+            if not k.startswith("_")
+        }
+        for k, v in dct.items():
+            if hasattr(v,"tolist"):
+                dct[k] = v.tolist()
+        return dct
+
+    def to_jsonable(self) -> dict:
+        return self._to_jsonable(self)
+
+    @classmethod
+    def from_jsonable(cls, dct: dict ):
+        raise NotImplementedError
+
+    @cached_property
+    def composition(self) -> dict[str,int]:
+        return {
+            AtomSymbol.from_atomic_number(z).name : len(self.z[self.z == z]) for z in set(self.z)
+        }
+
+    @staticmethod
+    def parse_atom_properties(
+        num_sites : int,
+        charges : list[float] | None = None,
+        spins : list[float] | None = None,
+        velocities : list[list[float]] | None = None,
+        degrees_of_freedom : list[list[bool]] | None = None,
+    ) -> tuple[np.ndarray | None, np.ndarray | None, np.ndarray | None, np.ndarray | None]:
+        
+        props : dict[str, np.ndarray | None] = {
+            k : np.array(
+                v, dtype=bool if k == "degrees_of_freedom" else float
+            ) if v is not None else None
+            for k, v in {
+                "charges": charges,
+                "spins": spins,
+                "velocities": velocities,
+                "degrees_of_freedom": degrees_of_freedom,
+            }.items()
+        }
+
+        shapes = {
+            "charges": (num_sites,),
+            "spins": (num_sites,),
+            "velocities": (num_sites,3),
+            "degrees_of_freedom": (num_sites,3)
+        }
+        for k, v in shapes.items():
+            if props[k] is not None and props[k].shape != v:
+                raise ValueError(
+                    f"Misaligned shape of {k}: expected {v}, got {props[k]}."
+                )
+                
+        return tuple(
+            props[k] for k in ("charges","spins","velocities","degrees_of_freedom")
+        )
+
 
 class Atom(ShapeShifter):
     """Basic representation of an atom."""
@@ -347,8 +420,8 @@ class Atom(ShapeShifter):
     @classmethod
     def from_atomic_number(cls, Z: int, **kwargs):
         """Create an Atom from the proton number."""
-        return cls.from_str(
-            AtomSymbol.from_atomic_number(Z, A=kwargs.pop("A", None)),
+        return cls(
+            symbol = AtomSymbol.from_atomic_number(Z, A=kwargs.pop("A", None)),
             **kwargs,
         )
 

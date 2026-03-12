@@ -8,21 +8,22 @@ from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 from pydantic import BaseModel, Field, model_serializer, model_validator
-from spglib import spglib
 
-from emmet.xtal.typing import vector_3_t, matrix_3x3_t, list_vector_3_t, bool_3_t
 from emmet.xtal.base import ShapeShifter, SETTINGS
-from emmet.xtal.atom import Atom
+from emmet.xtal.core.atom import Atom
+from emmet.xtal.typing import vector_3_t, matrix_3x3_t, list_vector_3_t, bool_3_t
 
 try:
     from pymatgen.core import (
         Structure as PmgStructure,
         Composition as PmgComposition,
+        Lattice as PmgLattice,
         Molecule as PmgMolecule,
     )
 except ImportError:
     PmgStructure = None
     PmgComposition = None
+    PmgLattice = None
 
 try:
     from ase.atoms import Atoms as AseAtoms
@@ -61,83 +62,7 @@ class AtomProperties(BaseModel):
         return any(
             getattr(self, k, None) is not None for k in AtomProperties.model_fields
         )
-
-
-class CellVector3D(BaseModel):
-    """Represent the cell vectors a, b, c."""
-
-    matrix: matrix_3x3_t
-
-    def __hash__(self) -> int:
-        return hash(self.matrix)
-
-    @property
-    def volume(self) -> float:
-        return abs(np.linalg.det(self.matrix))
-
-    @cached_property
-    def _reciprocal(self) -> np.ndarray:
-        matrix = np.array(self.matrix)
-        vol_fac = 1.0 / abs(np.dot(matrix[0], np.cross(matrix[1], matrix[2])))
-        return vol_fac * np.array(
-            [np.cross(matrix[(i + 1) % 3], matrix[(i + 2) % 3]) for i in range(3)]
-        )
-
-    @property
-    def reciprocal(self) -> matrix_3x3_t:
-        return tuple([tuple(2 * np.pi * v) for v in self._reciprocal])
-
-    @cached_property
-    def _vector_norms(self) -> vector_3_t:
-        return tuple([np.linalg.norm(v) for v in self.matrix])
-
-    @cached_property
-    def _angles(self) -> vector_3_t:
-        return [
-            180
-            / np.pi
-            * np.arccos(
-                np.dot(self.matrix[i], self.matrix[(i + 1) % 3])
-                / (self._vector_norms[i] * self._vector_norms[(i + 1) % 3])
-            )
-            for i in range(3)
-        ]
-
-    @property
-    def a(self) -> float:
-        return self._vector_norms[0]
-
-    @property
-    def b(self) -> float:
-        return self._vector_norms[1]
-
-    @property
-    def c(self) -> float:
-        return self._vector_norms[2]
-
-    @property
-    def alpha(self) -> float:
-        return self._angles[1]
-
-    @property
-    def beta(self) -> float:
-        return self._angles[2]
-
-    @property
-    def gamma(self) -> float:
-        return self._angles[0]
-
-    def _qr_decomposition(self) -> tuple[np.ndarray, np.ndarray]:
-        q, r = np.linalg.qr(self.matrix)
-        if np.prod(np.diagonal(r)) < 0:
-            return -q, -r
-        return q, r
-
-    @property
-    def upper_triangular(self) -> CellVector3D:
-        return CellVector3D(matrix=self._qr_decomposition()[1])
-
-
+        
 class Composition(ShapeShifter):
     """Basic interface for composition tools."""
 
@@ -249,30 +174,9 @@ class Composition(ShapeShifter):
     def __hash__(self) -> int:
         return hash(self.formula)
 
-
-def set_coords(
-    cell: CellVector3D, coords: list_vector_3_t, to: Literal["cartesian", "direct"]
-) -> list_vector_3_t:
-    if to == "direct":
-        # return [
-        #     tuple(v) for v in np.linalg.solve(cell.T, np.array(coords).T).T
-        # ]
-        return [
-            tuple(v)
-            for v in np.einsum("ij,ki->kj", cell._reciprocal.T, np.array(coords))
-        ]
-    elif to == "cartesian":
-        return [
-            tuple(v)
-            for v in np.einsum("ij,ki->kj", np.array(cell.matrix), np.array(coords))
-        ]
-    raise ValueError(
-        f'Unknown transformation {to}. Please select "cartesian" or "direct".'
-    )
-
-
-class NonPeriodicConfig(ShapeShifter):
-    """Represent a set of atoms and their coordinates in space."""
+"""
+class PydanticMolecule(ShapeShifter):
+    #Represent a set of atoms and their coordinates in space.
 
     atomic_numbers: tuple[int, ...]
     coords: list_vector_3_t
@@ -329,7 +233,7 @@ class NonPeriodicConfig(ShapeShifter):
         return cls(**config, **kwargs)
 
     def _species(self) -> list[dict[str, float]]:
-        """Aggregate atoms on each site into a list of dicts."""
+        #Aggregate atoms on each site into a list of dicts.
         return [
             (
                 {str(Atom.from_atomic_number(k)): v for k, v in atom.items()}
@@ -340,7 +244,7 @@ class NonPeriodicConfig(ShapeShifter):
         ]
 
     def _aggregate_site_properties(self) -> dict[str, list[Any]]:
-        """Aggregate site properties into a pymatgen-like dict."""
+        #Aggregate site properties into a pymatgen-like dict.
 
         if self.atom_properties is None or not any(self.atom_properties):
             return {}
@@ -428,194 +332,4 @@ class NonPeriodicConfig(ShapeShifter):
                 for k, v in config.items()
             }
         )
-
-
-class PeriodicConfig(NonPeriodicConfig):
-    """Represent a set of atoms with periodicity."""
-
-    cell: CellVector3D
-    pbc: bool_3_t = Field()
-
-    def __hash__(self) -> int:
-        return hash(
-            (
-                tuple(self.atomic_numbers),
-                tuple(self.coords),
-                self.cell,
-                tuple(self.atom_properties),
-            )
-        )
-
-    @cached_property
-    def frac_coords(self) -> list_vector_3_t:
-        return set_coords(self.cell, self.coords, "direct")
-
-    @property
-    def volume(self) -> float:
-        return self.cell.volume
-
-    @property
-    def density(self) -> float:
-        """Structure density in g/cm^3."""
-        return self.composition.mass * 1e24 / self.cell.volume
-
-    @classmethod
-    def _from_pymatgen(cls, atoms: PmgStructure) -> Self:
-
-        if not atoms.is_ordered:
-            raise ValueError(
-                "Please use `DisorderedConfig` to represent a disordered structure."
-            )
-
-        aux_config = {
-            "cell": CellVector3D(matrix=atoms.lattice.matrix),
-            "pbc": (True,) * 3,
-        }
-        return super()._from_pymatgen(atoms, **aux_config)
-
-    def _to_pymatgen(self) -> PmgStructure:
-        return PmgStructure(
-            species=self._species(),
-            lattice=self.cell.matrix,
-            coords=self.coords,
-            site_properties=self._aggregate_site_properties(),
-            coords_are_cartesian=True,
-        )
-
-    @cached_property
-    def _to_spglib(self) -> tuple[matrix_3x3_t, list_vector_3_t, list[int]]:
-        """Create an spglib-compatible representation of the atoms."""
-        return (
-            self.cell.matrix,
-            self.frac_coords,
-            self.atomic_numbers,
-        )
-
-    @classmethod
-    def _from_spglib(
-        cls, spglib_rep: tuple[matrix_3x3_t, list_vector_3_t, list[int]]
-    ) -> Self:
-        cell, frac_coords, atomic_numbers = spglib_rep
-        cell = CellVector3D(matrix=cell)
-        return cls(
-            atoms=atomic_numbers,
-            cell=cell,
-            coords=set_coords(cell, frac_coords, to="cartesian"),
-            pbc=(True, True, True),
-        )
-
-    def _to_ase(self, **kwargs):
-        return super()._to_ase(cell=self.cell.matrix, pbc=self.pbc, **kwargs)
-
-    def primitive(
-        self, symprec: float = SETTINGS.SYMPREC, angprec: float = SETTINGS.ANGPREC
-    ) -> PeriodicConfig:
-        return self._from_spglib(
-            spglib.find_primitive(
-                self._to_spglib, symprec=symprec, angle_tolerance=angprec
-            )
-        )
-
-    def conventional(
-        self, symprec: float = SETTINGS.SYMPREC, angprec: float = SETTINGS.ANGPREC
-    ) -> PeriodicConfig:
-        return self._from_spglib(
-            spglib.standardize_cell(
-                self._to_spglib, symprec=symprec, angle_tolerance=angprec
-            )
-        )
-
-    def get_space_group_info(
-        self, symprec: float = SETTINGS.SYMPREC, angprec: float = SETTINGS.ANGPREC
-    ) -> tuple[str, int]:
-        sg_info = spglib.get_spacegroup(
-            self._to_spglib, symprec=symprec, angle_tolerance=angprec
-        )
-        return tuple(re.match(r"(.*) \((.*)\)", sg_info).groups())
-
-    def get_space_group_symbol(self):
-        return self.get_space_group_info()[0]
-
-    def get_space_group_number(self):
-        return self.get_space_group_info()[1]
-
-    def scale_volume(self, scale_factor: float) -> PeriodicConfig:
-
-        npbc = len([v for v in self.pbc if v])
-        per_cell_vector = scale_factor ** (1 / npbc)
-
-        new_cell = CellVector3D(matrix=per_cell_vector * np.array(self.cell.matrix))
-
-        new_cart_coords = set_coords(new_cell, self.frac_coords, to="cartesian")
-
-        return type(self)(
-            atomic_numbers=self.atomic_numbers,
-            coords=new_cart_coords,
-            cell=new_cell,
-            pbc=self.pbc,
-            atom_properties=self.atom_properties,
-        )
-
-    def standardized(self) -> PeriodicConfig:
-
-        site_order = np.argsort(self.atomic_numbers)
-
-        new_cell = self.cell.upper_triangular
-        new_direct_coords = np.array(
-            set_coords(new_cell, [self.coords[idx] for idx in site_order], to="direct")
-        )
-        new_direct_coords = new_direct_coords - new_direct_coords[0]
-        new_direct_coords = [[x % 1 for x in v] for v in new_direct_coords]
-
-        new_cart_coords = set_coords(new_cell, new_direct_coords, to="cartesian")
-
-        return PeriodicConfig(
-            atomic_numbers=self.atomic_numbers,
-            coords=new_cart_coords,
-            cell=new_cell,
-            pbc=self.pbc,
-            atom_properties=(
-                [self.atom_properties[idx] for idx in site_order]
-                if self.atom_properties
-                else None
-            ),
-        )
-
-
-class DisorderedConfig(PeriodicConfig):
-    """Represent a configurationally-disordered set of atoms."""
-
-    atomic_numbers: tuple[dict[int, float], ...]
-
-    @model_validator(mode="before")
-    @classmethod
-    def serialize_composition(cls, config: Any) -> Any:
-        for isite, site in enumerate(config["atoms"]):
-            if isinstance(site, dict):
-                config["atoms"][isite] = Composition(atoms=site)
-        return config
-
-    @classmethod
-    def _from_pymatgen(cls, atoms: PmgStructure, site_tol: float | None = 1.0e-2):
-
-        config = {
-            "atomic_numbers": [],
-            "coords": [],
-            "cell": CellVector3D(matrix=atoms.lattice.matrix),
-            "pbc": (True,) * 3,
-            "atom_properties": [],
-        }
-        for site in atoms:
-            site_comp = Composition._from_pymatgen(site.species)
-            config["atomic_numbers"].append({k.Z: v for k, v in site_comp.items()})
-            if site_tol and abs(sum(site_comp.values()) - 1.0) > site_tol:
-                raise ValueError(
-                    f"Fractional site occupancy {sum(site_comp.values())} "
-                    f"exceeds {site_tol} tolerance."
-                )
-            config["coords"].append(site.coords)
-            config["atom_properties"].append(AtomProperties(**site.properties))
-        if not any(config["atom_properties"]):
-            config["atom_properties"] = None
-
-        return cls(**config)
+"""

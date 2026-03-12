@@ -16,6 +16,7 @@ class PackageInterface(Enum):
     ASE = "ase"
     PANDAS = "pandas"
     ARROW = "pyarrow"
+    JSON = "dict"
 
     @classmethod
     def _missing_(cls, value):
