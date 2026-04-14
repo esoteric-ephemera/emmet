@@ -20,7 +20,7 @@ class Cell(np.ndarray):
         plain_inputs = [np.asarray(x) for x in inputs]
         result = getattr(ufunc, method)(*plain_inputs, **kwargs)
         if isinstance(result, np.ndarray) and result.shape == (3, 3) and result.dtype == np.float64:
-            return result.view(Matrix3x3)
+            return result.view(Cell)
         return result  # return plain ndarray if result doesn't qualify
 
     @cached_property

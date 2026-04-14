@@ -11,28 +11,13 @@ import pandas as pd
 from pydantic import PrivateAttr
 from scipy.constants import physical_constants
 
-from emmet.xtal.base import PackageInterface, INSTALLED_PACKAGES, ShapeShifter
-from emmet.xtal.typing import null_t
-
-if INSTALLED_PACKAGES[PackageInterface.PMG]:
-    from pymatgen.core import (
-        Element as PmgElement,
-        Species as PmgSpecies,
-    )
-else:
-    PmgElement = null_t
-    PmgSpecies = null_t
+from emmet.xtal.base import ShapeShifter
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
 ATOM_DATA_FILE = Path(__file__).absolute().parent.parent / "data" / "isotope_data.json.gz"
-
-if ATOM_DATA_FILE.exists():
-    ATOM_DATA = pd.read_json(ATOM_DATA_FILE)
-else:
-    ATOM_DATA = None
-
+ATOM_DATA = pd.read_json(ATOM_DATA_FILE) if ATOM_DATA_FILE.exists() else None
 
 class AtomSymbol(Enum):
     """Chemical element / isotope to longer American English name."""
@@ -295,7 +280,8 @@ def fetch_isotope_data(
     return data
 
 class AtomsMixIn:
-    
+    """Base mix-in for molecules, (ordered) materials, and disordered materials."""
+
     @cached_property
     def _masses(self) -> np.ndarray:
         return np.sum([Atom.from_atomic_number(z).mass for z in self.z])
@@ -424,26 +410,6 @@ class Atom(ShapeShifter):
             symbol = AtomSymbol.from_atomic_number(Z, A=kwargs.pop("A", None)),
             **kwargs,
         )
-
-    @classmethod
-    def _from_pymatgen(cls, species: PmgElement | PmgSpecies):
-        """Create a pymatgen Element or Species."""
-        kwargs = {}
-        if spin := getattr(species, "spin", None):
-            kwargs["spin"] = spin
-        return cls.from_str(str(species), **kwargs)
-
-    def _to_pymatgen(
-        self,
-    ) -> PmgElement | PmgSpecies:
-        """Create an Atom from a pymatgen Element or Species."""
-        if self.charge or self.spin:
-            return PmgSpecies(
-                self.name,
-                oxidation_state=self.charge,
-                spin=self.spin,
-            )
-        return PmgElement(self.name)
 
     @property
     def atomic_number(self) -> int:
